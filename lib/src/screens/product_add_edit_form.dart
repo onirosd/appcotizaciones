@@ -791,7 +791,7 @@ class _ProductAddEditFormState extends State<ProductAddEditForm> {
           1.07;
     }
     if (catProd == 2) {
-      peso = (((diam * diam * 0.63 * (larg + 5)) / 100) * cantid) / 1000;
+      peso = (((diam * diam * 0.616 * (larg + 5)) / 100) * cantid) / 1000;
     }
     if (catProd == 3) {
       peso = (diam * anch * larg * 8.55 * cantid) / 1000000;

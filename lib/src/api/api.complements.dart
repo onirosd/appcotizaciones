@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:appcotizaciones/src/helpers/database_helper.dart';
 import 'package:appcotizaciones/src/models/bank.dart';
@@ -29,12 +30,59 @@ class ComplementsApiProvider {
   var url_complements =
       DIR_URL + "Appstock/controller/services/listarComplementarios.php";
 
-  Future<List<Complements>> uploadComplements(
+  Future<List<Complements>> downloadComplements(
+      int coduser, String company) async {
+    SendUser user = SendUser(user: coduser, company: company);
+    String jsonUser = jsonEncode(user);
+    List data = [];
+
+    try {
+      final response = await http.post(
+        Uri.parse(url_complements),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Accept-Encoding': 'gzip',
+        },
+        body: jsonUser,
+      );
+      final isGzip =
+          response.headers['content-encoding']?.contains('gzip') ?? false;
+      final bytes = response.bodyBytes;
+      final String decodedJson = utf8.decode(response.bodyBytes);
+      final parsedJson = json.decode(decodedJson);
+
+      if (response.statusCode == 200) {
+        if (parsedJson is List && parsedJson.isNotEmpty) {
+          return [Complements.fromMap(parsedJson[0])];
+        }
+
+        if (parsedJson is Map && parsedJson.containsKey('error')) {
+          print("Error desde API: ${parsedJson['description']}");
+          return [];
+        }
+
+        print("Estructura inesperada: $parsedJson");
+        return [];
+      } else {
+        print("Error HTTP ${response.statusCode}:");
+        print(decodedJson);
+        return [];
+      }
+    } catch (e) {
+      print("Excepción al obtener complementos: $e");
+      return [];
+    }
+  }
+
+  Future<List<Complements>> downloadComplements_depre(
       int coduser, String company) async {
     // ResponseError error =
     //     new ResponseError(description: "", error: 0, success: 0);
     print("llegamos por aqui tambien !!! ....");
     SendUser user = new SendUser(user: coduser, company: company);
+    String jsonUser = jsonEncode(user);
+    print(">>>>>>>>>>>> IMPRESION DEL JSON USER >>>>>>>>>>>>>");
+    print(jsonUser);
     List data = [];
 
     try {
@@ -43,7 +91,7 @@ class ComplementsApiProvider {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(user),
+        body: jsonUser,
       );
 
       if (response.statusCode == 200) {
@@ -69,7 +117,6 @@ class ComplementsApiProvider {
 
       data = json.decode(response.body); // Map.from(json.decode(response
       //.body)); //new Map<String, dynamic>.from(json.decode(response.body));
-
     } catch (e) {}
 
     return data.map((job) => new Complements.fromMap(job)).toList();
@@ -261,7 +308,6 @@ class ComplementsApiProvider {
   }
 
 */
-
 }
 
 class SendUser {
@@ -299,7 +345,10 @@ class SendUser {
     );
   }
 
-  String toJson() => json.encode(toMap());
+  Map<String, dynamic> toJson() => {
+        'user': user,
+        'company': company,
+      };
 
   factory SendUser.fromJson(String source) =>
       SendUser.fromMap(json.decode(source));

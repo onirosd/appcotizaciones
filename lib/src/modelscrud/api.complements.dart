@@ -289,7 +289,7 @@ class ApiComplements {
 
     try {
       List<Complements> complements =
-          await api.uploadComplements(codUser, company);
+          await api.downloadComplements(codUser, company);
 
       responseerror = await api.batchInsertComplements(complements);
 

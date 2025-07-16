@@ -35,6 +35,8 @@ import 'package:appcotizaciones/src/providers/changes.notifier.dart';
 import 'package:appcotizaciones/src/search/search_customers.dart';
 import 'package:appcotizaciones/src/widgets/appbars2.dart';
 
+import 'package:appcotizaciones/src/services/sync_service.dart';
+
 //import 'db_provider.dart';
 
 class ProviderHome extends StatefulWidget {
@@ -65,6 +67,10 @@ class _ProviderHome extends State<ProviderHome> {
   String _mensaje = "";
   // SharedPreferencesTest preferences = new SharedPreferencesTest();
   bool _isInternet = true;
+
+  String _pasoActual = '';
+  bool _isSyncing = false;
+
   SyncLog _lastlogUser = new SyncLog(
       codLog: 0,
       codUser: 0,
@@ -86,6 +92,18 @@ class _ProviderHome extends State<ProviderHome> {
 
   Map _source = {ConnectivityResult.none: false};
   final MyConnectivity _connectivity = MyConnectivity.instance;
+
+  void _setPasoActual(String paso) {
+    setState(() {
+      _pasoActual = paso;
+    });
+  }
+
+  void _setIsSyncing(bool val) {
+    setState(() {
+      _isSyncing = val;
+    });
+  }
 
   _getPreferences() async {
     TiPersonCtr crtPerson = new TiPersonCtr();
@@ -212,7 +230,9 @@ class _ProviderHome extends State<ProviderHome> {
     });
 
     final ButtonStyle raisedButtonStyleSync = ElevatedButton.styleFrom(
-        foregroundColor: Colors.white, backgroundColor: Colors.blue[500], alignment: Alignment.center,
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.blue[500],
+        alignment: Alignment.center,
         fixedSize: Size(150, 50),
         // padding: EdgeInsets.symmetric(horizontal: 50, vertical: 10),
         shape: const RoundedRectangleBorder(
@@ -242,6 +262,40 @@ class _ProviderHome extends State<ProviderHome> {
                 // _datosPerfil(
                 //   tiperson: _dataPerson,
                 // ),
+                if (_isSyncing)
+                  Consumer<AuthenticationProvider>(
+                    builder: (context, auth, _) {
+                      if (!auth.isLoading) return SizedBox.shrink();
+
+                      return Container(
+                        padding: EdgeInsets.all(10),
+                        color: Color.fromARGB(187, 7, 93, 233),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2, color: Colors.white),
+                            ),
+                            SizedBox(width: 10),
+                            Flexible(
+                              child: Text(
+                                auth.pasoActual,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.white,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+
                 Container(
                   //margin: EdgeInsets.only(top: 40),
                   color: Color.fromARGB(255, 125, 184, 255),
@@ -257,22 +311,26 @@ class _ProviderHome extends State<ProviderHome> {
                               children: [
                                 Container(
                                   margin: EdgeInsets.only(top: 0, left: 20),
-                                  child: ChangeNotifierProvider(
-                                      create: (_) => AuthenticationProvider(),
-                                      child: _datosSincronizacion2(
-                                        context: context,
-                                        isInternet: _isInternet,
-                                        codUser: _CodUser,
-                                        sync: _lastlogUser,
-                                        tSyncPending: _TotalPending,
-                                        registersPendigs:
-                                            _totalPendingRegisters,
-                                        codList: int.parse(_CodList),
-                                        indicators: _indicators,
-                                        sca: _scaffoldKey,
-                                        position1: _PositionVal,
-                                        cod_company: _codCompany.toString(),
-                                      )),
+                                  child: _datosSincronizacion2(
+                                    context: context,
+                                    isInternet: _isInternet,
+                                    codUser: _CodUser,
+                                    sync: _lastlogUser,
+                                    tSyncPending: _TotalPending,
+                                    registersPendigs: _totalPendingRegisters,
+                                    codList: int.parse(_CodList),
+                                    indicators: _indicators,
+                                    sca: _scaffoldKey,
+                                    position1: _PositionVal,
+                                    cod_company: _codCompany.toString(),
+                                    onStepUpdate: (paso) {
+                                      Provider.of<AuthenticationProvider>(
+                                              context,
+                                              listen: false)
+                                          .setPaso(paso);
+                                    },
+                                    onSyncStateChange: _setIsSyncing,
+                                  ),
                                 ),
                               ],
                             ),
@@ -1032,18 +1090,118 @@ class _DataSource extends DataTableSource {
   int get selectedRowCount => _selectedCount;
 }
 
-class _datosSincronizacion2 extends StatelessWidget {
-  BuildContext context;
-  bool isInternet;
-  int codUser;
-  SyncLog? sync;
-  int tSyncPending;
-  List<SelectPendingSync> registersPendigs;
-  int codList;
-  List<Ti_IndicatorsUser> indicators;
-  GlobalKey<ScaffoldState> sca;
-  String position1;
-  String cod_company;
+// class _datosSincronizacion2 extends StatelessWidget {
+//   BuildContext context;
+//   bool isInternet;
+//   int codUser;
+//   SyncLog? sync;
+//   int tSyncPending;
+//   List<SelectPendingSync> registersPendigs;
+//   int codList;
+//   List<Ti_IndicatorsUser> indicators;
+//   GlobalKey<ScaffoldState> sca;
+//   String position1;
+//   String cod_company;
+
+//   _datosSincronizacion2(
+//       {required this.context,
+//       required this.isInternet,
+//       required this.codUser,
+//       required this.sync,
+//       required this.tSyncPending,
+//       required this.registersPendigs,
+//       required this.codList,
+//       required this.indicators,
+//       required this.sca,
+//       required this.position1,
+//       required this.cod_company});
+
+//   String mensaje = " ";
+
+//   final ButtonStyle raisedButtonStyleSync = ElevatedButton.styleFrom(
+//       foregroundColor: Colors.white,
+//       backgroundColor: Colors.blue[500],
+//       alignment: Alignment.center,
+//       fixedSize: Size(150, 50),
+//       // padding: EdgeInsets.symmetric(horizontal: 50, vertical: 10),
+//       shape: const RoundedRectangleBorder(
+//         borderRadius: BorderRadius.all(Radius.circular(2)),
+//       ));
+
+//   Widget build(BuildContext mainContext) {
+//     final loginForm = Provider.of<AuthenticationProvider>(mainContext);
+
+//     return Container(
+//       height: 60,
+//       margin: EdgeInsets.only(top: 0, right: 20),
+//       child: OutlinedButton(
+//         style: raisedButtonStyleSync,
+//         onPressed: loginForm.isLoading || isInternet == false
+//             ? null
+//             : () async {
+//                 loginForm.isLoading = true;
+
+//                 final syncService = SyncService();
+
+//                 try {
+//                   await syncService.syncAll(
+//                     codUser: codUser,
+//                     codList: codList,
+//                     codCompany: cod_company,
+//                     position: position1,
+//                     onStep: (paso) {
+//                       print(
+//                           "🔄 $paso"); // o usar un snackbar si deseas mostrar al usuario
+//                       // Ejemplo opcional con ScaffoldMessenger
+//                       /*
+//               ScaffoldMessenger.of(context).showSnackBar(
+//                 SnackBar(content: Text(paso), duration: Duration(milliseconds: 800)),
+//               );
+//               */
+//                     },
+//                   );
+
+//                   Navigator.pushNamed(context, "home");
+//                 } catch (e) {
+//                   print("❌ Error de sincronización: $e");
+
+//                   // También puedes mostrar un mensaje visual aquí si quieres:
+//                   /*
+//           ScaffoldMessenger.of(context).showSnackBar(
+//             SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+//           );
+//           */
+//                 } finally {
+//                   loginForm.isLoading = false;
+//                 }
+//               },
+//         child: Text(isInternet
+//             ? loginForm.isLoading
+//                 ? 'Espere'
+//                 : 'Sincronizar'
+//             : "Sin Internet"),
+//       ),
+//     );
+//   }
+// }
+
+class _datosSincronizacion2 extends StatefulWidget {
+  final BuildContext context;
+  final bool isInternet;
+  final int codUser;
+  final SyncLog? sync;
+  final int tSyncPending;
+  final List<SelectPendingSync> registersPendigs;
+  final int codList;
+  final List<Ti_IndicatorsUser> indicators;
+  final GlobalKey<ScaffoldState> sca;
+  final String position1;
+  final String cod_company;
+  // final String onStepUpdate;
+  // final bool onSyncStateChange;
+
+  final void Function(String paso)? onStepUpdate; // ← Agregado
+  final void Function(bool syncing)? onSyncStateChange; // ← Agregado
 
   _datosSincronizacion2(
       {required this.context,
@@ -1056,109 +1214,104 @@ class _datosSincronizacion2 extends StatelessWidget {
       required this.indicators,
       required this.sca,
       required this.position1,
-      required this.cod_company});
+      required this.cod_company,
+      required this.onStepUpdate,
+      required this.onSyncStateChange});
 
-  String mensaje = " ";
+  @override
+  State<_datosSincronizacion2> createState() => _datosSincronizacion2State();
+}
 
+class _datosSincronizacion2State extends State<_datosSincronizacion2> {
+  // String pasoActual = "";
   final ButtonStyle raisedButtonStyleSync = ElevatedButton.styleFrom(
-      foregroundColor: Colors.white, backgroundColor: Colors.blue[500], alignment: Alignment.center,
-      fixedSize: Size(150, 50),
-      // padding: EdgeInsets.symmetric(horizontal: 50, vertical: 10),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(2)),
-      ));
+    foregroundColor: Colors.white,
+    backgroundColor: Colors.blue[500],
+    alignment: Alignment.center,
+    fixedSize: Size(150, 50),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(2)),
+    ),
+  );
 
-  Widget build(BuildContext mainContext) {
-    final loginForm = Provider.of<AuthenticationProvider>(mainContext);
+  @override
+  Widget build(BuildContext context) {
+    final loginForm = Provider.of<AuthenticationProvider>(
+      context,
+      listen: true,
+    );
 
-    return Container(
-      height: 60,
-      margin: EdgeInsets.only(top: 0, right: 20),
-      child: OutlinedButton(
-        style: raisedButtonStyleSync,
-        onPressed: loginForm.isLoading || isInternet == false
-            ? null
-            : () async {
-                loginForm.isLoading = true;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        OutlinedButton(
+          style: raisedButtonStyleSync,
+          onPressed: loginForm.isLoading || widget.isInternet == false
+              ? null
+              : () async {
+                  loginForm.isLoading = true;
 
-                ApiComplements com = new ApiComplements();
-                ResponseError resp;
+                  widget.onSyncStateChange
+                      ?.call(true); // Mostrar barra de progreso
 
-                ApiConfigGeneral configgeneral = ApiConfigGeneral();
+                  final syncService = SyncService();
 
-                /*
-                                              print(
-                                                  "entrando load complements");
-                                              ResponseError resp1 =
-                                                  await configgeneral
-                                                      .executionRuleLoadComplements(
-                                                          codUser, 1);
-                                              */
-                /* rules 2 : Cargamos datos del cliente  */
+                  try {
+                    await syncService.syncAll(
+                      codUser: widget.codUser,
+                      codList: widget.codList,
+                      codCompany: widget.cod_company,
+                      position: widget.position1,
+                      onStep: (paso) {
+                        // ✅ Actualiza directamente en el Provider
+                        loginForm.setPaso(paso);
+                      },
+                    );
 
-                print("subiendo nuevos clientes si lo tenemos");
-                ResponseError resp3 =
-                    await configgeneral.executionRuleUploadClients(codUser);
-
-                print("subiendo nuevos recibos si lo tenemos");
-                ResponseError resp4 =
-                    await configgeneral.executionRuleUploadBilling(codUser);
-
-                print("subiendo nuevas cotizaciones si tenemos ");
-                ResponseError resp5 =
-                    await configgeneral.executionRuleUploadQuotation(codUser);
-
-                print("subiendo nuevas galerias si tenemos ");
-                ResponseError resp8 =
-                    await configgeneral.executionRuleUploadGalleries(codUser);
-
-                print(" Actualizando lista de productos con su stock");
-                ResponseError resp6 =
-                    await configgeneral.executionRuleUploadStockProduct(
-                        codUser, codList, cod_company);
-
-                print(" Sincronizando los recibos y cotizaciones ");
-                ResponseError resp7 =
-                    await configgeneral.executionRuleUploadSyncQuoBill(
-                        codUser, position1, cod_company);
-
-                /*print("Cargando clientes");
-                                              ResponseError resp2 =
-                                                  await configgeneral
-                                                      .executionRuleLoadClients(
-                                                        codUser, 1);
-                                              */
-
-                await Future.delayed(Duration(seconds: 1));
-                print("Sincronizando Información !!");
-
-                SyncLogCtr log = new SyncLogCtr();
-                await log.saveLogtoUser(
-                    codUser, 'Sync-general', 'Sincronizacion Finalizada');
-
-                // final msg = resp6.description +
-                //     "\n\n" +
-                //     resp3.description +
-                //     "\n\n" +
-                //     resp5.description +
-                //     "\n\n" +
-                //     resp4.description;
-
-                // mensaje = msg;
-
-                // sca.currentState!.showSnackBar(
-                //     SnackBar(content: Text(msg), duration: Duration.,);
-                Navigator.pushNamed(context, "home");
-
-                //resp = await com.syncComplementsfromApi(
-                ///   codUser, 'Sync-general');
-              },
-        child: Text(isInternet
-            ? loginForm.isLoading
-                ? 'Espere'
-                : 'Sincronizar'
-            : "Sin Internet"),
-      ),
+                    loginForm.setPaso('✅ ¡Sincronización completada!');
+                    await Future.delayed(Duration(seconds: 1));
+                    loginForm.setPaso('');
+                    widget.onSyncStateChange?.call(false);
+                    loginForm.isLoading = false;
+                  } catch (e) {
+                    print("❌ Error de sincronización: $e");
+                    loginForm.setPaso('');
+                    widget.onSyncStateChange?.call(false);
+                    loginForm.isLoading = false;
+                  }
+                },
+          child: Text(widget.isInternet
+              ? loginForm.isLoading
+                  ? 'Espere...'
+                  : 'Sincronizar'
+              : "Sin Internet"),
+        ),
+        SizedBox(height: 8),
+        // if (loginForm.isLoading)
+        //   Container(
+        //     margin: EdgeInsets.only(top: 8),
+        //     constraints: BoxConstraints(maxWidth: 200), // Le damos un límite
+        //     child: Row(
+        //       children: [
+        //         SizedBox(
+        //           width: 20,
+        //           height: 20,
+        //           child: CircularProgressIndicator(strokeWidth: 2),
+        //         ),
+        //         SizedBox(width: 10),
+        //         Flexible(
+        //           // ✅ Usamos Flexible en lugar de Expanded
+        //           child: Text(
+        //             pasoActual,
+        //             style: TextStyle(fontSize: 13, color: Colors.black87),
+        //             maxLines: 2,
+        //             overflow: TextOverflow.ellipsis,
+        //           ),
+        //         ),
+        //       ],
+        //     ),
+        //   ),
+      ],
     );
   }
 }
@@ -1221,350 +1374,6 @@ class Billingandflag {
   @override
   int get hashCode => billingdata.hashCode ^ switch1.hashCode;
 }
-
-// class _datosSincronizacion extends StatelessWidget {
-//   bool isInternet;
-//   int codUser;
-//   SyncLog? sync;
-//   int tSyncPending;
-//   List<SelectPendingSync> registersPendigs;
-//   int codList;
-//   List<Ti_IndicatorsUser> indicators;
-//   GlobalKey<ScaffoldState> sca;
-//   String position1;
-
-//   _datosSincronizacion(
-//       {required this.isInternet,
-//       required this.codUser,
-//       required this.sync,
-//       required this.tSyncPending,
-//       required this.registersPendigs,
-//       required this.codList,
-//       required this.indicators,
-//       required this.sca,
-//       required this.position1});
-
-//   String mensaje = " ";
-
-//   final ButtonStyle raisedButtonStyle = ElevatedButton.styleFrom(
-//       // onPrimary: Colors.blue[800],
-//       primary: Colors.amber[800],
-//       fixedSize: Size(150, 40),
-//       // padding: EdgeInsets.symmetric(horizontal: 50, vertical: 10),
-//       shape: const RoundedRectangleBorder(
-//         borderRadius: BorderRadius.all(Radius.circular(2)),
-//       ));
-
-//   final ButtonStyle raisedButtonStyleSync = ElevatedButton.styleFrom(
-//       onPrimary: Colors.white,
-//       primary: Colors.blue[500],
-//       fixedSize: Size(150, 40),
-//       // padding: EdgeInsets.symmetric(horizontal: 50, vertical: 10),
-//       shape: const RoundedRectangleBorder(
-//         borderRadius: BorderRadius.all(Radius.circular(2)),
-//       ));
-
-//   @override
-//   Widget build(BuildContext mainContext) {
-//     final loginForm = Provider.of<AuthenticationProvider>(mainContext);
-//     return Container(
-//       child: Column(
-//         children: [
-//           Row(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               Expanded(
-//                 child: Container(
-//                   width: 50,
-//                   height: 100,
-//                   decoration: BoxDecoration(
-//                       border: Border.all(color: Colors.blue),
-//                       borderRadius: BorderRadius.all(Radius.circular(20))),
-//                   //color: Colors.red,
-//                   margin: EdgeInsets.all(20),
-
-//                   child: Column(
-//                     children: [
-//                       Row(
-//                         children: [
-//                           Expanded(
-//                               flex: 4,
-//                               child: Column(
-//                                 children: [
-//                                   Container(
-//                                     margin: EdgeInsets.only(top: 2, left: 20),
-//                                     child: Column(
-//                                       children: [
-//                                         Row(
-//                                           children: [
-//                                             Text("Ultima Actualización : ")
-//                                           ],
-//                                         ),
-//                                         Row(
-//                                           crossAxisAlignment:
-//                                               CrossAxisAlignment.start,
-//                                           children: [
-//                                             Expanded(
-//                                               flex: 3,
-//                                               child: new Icon(
-//                                                 Icons.watch_later_outlined,
-//                                                 size: 50,
-//                                                 color: Colors.black,
-//                                               ),
-//                                             ),
-//                                             Expanded(
-//                                                 flex: 5,
-//                                                 child: Column(
-//                                                   crossAxisAlignment:
-//                                                       CrossAxisAlignment.start,
-//                                                   children: [
-//                                                     SizedBox(height: 7),
-//                                                     Text(sync!.strDay),
-//                                                     Text(sync!.strhour),
-//                                                   ],
-//                                                 )),
-//                                           ],
-//                                         ),
-//                                       ],
-//                                     ),
-//                                   )
-//                                 ],
-//                               )),
-//                           Expanded(
-//                               flex: 4,
-//                               child: Column(
-//                                 children: [
-//                                   Container(
-//                                     margin: EdgeInsets.only(top: 2, right: 20),
-//                                     child: Text(
-//                                       tSyncPending > 0
-//                                           ? "Necesitas Sincronizar 🧭"
-//                                           : "",
-//                                       style: TextStyle(
-//                                           height: 2,
-//                                           color: Colors.red,
-//                                           fontSize: 12,
-//                                           fontWeight: FontWeight.bold),
-//                                     ),
-
-//                                     /* OutlinedButton(
-//                                       style: raisedButtonStyle,
-//                                       onPressed: () {},
-//                                       child: Text("Pendiente"),
-//                                     ),*/
-//                                   ),
-//                                   Container(
-//                                     margin: EdgeInsets.only(top: 0, right: 20),
-//                                     child: OutlinedButton(
-//                                       style: raisedButtonStyleSync,
-//                                       onPressed: loginForm.isLoading ||
-//                                               isInternet == false
-//                                           ? null
-//                                           : () async {
-//                                               loginForm.isLoading = true;
-
-//                                               ApiComplements com =
-//                                                   new ApiComplements();
-//                                               ResponseError resp;
-
-//                                               ApiConfigGeneral configgeneral =
-//                                                   ApiConfigGeneral();
-
-//                                               /*
-//                                               print(
-//                                                   "entrando load complements");
-//                                               ResponseError resp1 =
-//                                                   await configgeneral
-//                                                       .executionRuleLoadComplements(
-//                                                           codUser, 1);
-//                                               */
-//                                               /* rules 2 : Cargamos datos del cliente  */
-
-//                                               print(
-//                                                   "subiendo nuevos clientes si lo tenemos");
-//                                               ResponseError resp3 =
-//                                                   await configgeneral
-//                                                       .executionRuleUploadClients(
-//                                                           codUser);
-
-//                                               print(
-//                                                   "subiendo nuevos recibos si lo tenemos");
-//                                               ResponseError resp4 =
-//                                                   await configgeneral
-//                                                       .executionRuleUploadBilling(
-//                                                           codUser);
-
-//                                               print(
-//                                                   "subiendo nuevas cotizaciones si tenemos ");
-//                                               ResponseError resp5 =
-//                                                   await configgeneral
-//                                                       .executionRuleUploadQuotation(
-//                                                           codUser);
-
-//                                               print(
-//                                                   " Actualizando lista de productos con su stock");
-//                                               ResponseError resp6 =
-//                                                   await configgeneral
-//                                                       .executionRuleUploadStockProduct(
-//                                                           codUser, codList);
-
-//                                               print(
-//                                                   " Sincronizando los recibos y cotizaciones ");
-//                                               ResponseError resp7 =
-//                                                   await configgeneral
-//                                                       .executionRuleUploadSyncQuoBill(
-//                                                           codUser, position1);
-
-//                                               /*print("Cargando clientes");
-//                                               ResponseError resp2 =
-//                                                   await configgeneral
-//                                                       .executionRuleLoadClients(
-//                                                         codUser, 1);
-//                                               */
-
-//                                               await Future.delayed(
-//                                                   Duration(seconds: 1));
-//                                               print(
-//                                                   "Sincronizando Información !!");
-
-//                                               SyncLogCtr log = new SyncLogCtr();
-//                                               await log.saveLogtoUser(
-//                                                   codUser,
-//                                                   'Sync-general',
-//                                                   'Sincronizacion Finalizada');
-
-//                                               // final msg = resp6.description +
-//                                               //     "\n\n" +
-//                                               //     resp3.description +
-//                                               //     "\n\n" +
-//                                               //     resp5.description +
-//                                               //     "\n\n" +
-//                                               //     resp4.description;
-
-//                                               // mensaje = msg;
-
-//                                               // sca.currentState!.showSnackBar(
-//                                               //     SnackBar(content: Text(msg), duration: Duration.,);
-
-//                                               // sca
-//                                               //     .of(mainContext)
-//                                               //     .showSnackBar();
-
-//                                               Navigator.pushNamed(
-//                                                   mainContext, "home");
-
-//                                               //resp = await com.syncComplementsfromApi(
-//                                               ///   codUser, 'Sync-general');
-
-//                                               // if (resp.error == 1) {
-//                                               //   ScaffoldMessenger.of(context).showSnackBar(
-//                                               //       SnackBar(content: Text(resp.description)));
-//                                               // } else {
-//                                               //   ScaffoldMessenger.of(context).showSnackBar(
-//                                               //       SnackBar(content: Text(resp.description)));
-//                                               //   Navigator.pushNamed(context, "home");
-//                                               // }
-//                                               //Navigator.pushNamed(context, "home");
-//                                             },
-//                                       child: Text(isInternet
-//                                           ? loginForm.isLoading
-//                                               ? 'Espere'
-//                                               : 'Sincronizar'
-//                                           : "Sin Internet"),
-//                                     ),
-//                                   )
-//                                 ],
-//                               )),
-//                         ],
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//               ),
-//             ],
-//           ),
-//           Row(
-//             children: [
-//               Expanded(
-//                 flex: 5,
-//                 child: Container(
-//                   margin: EdgeInsets.fromLTRB(25, 0, 0, 0),
-//                   child: tSyncPending == 0
-//                       ? null
-//                       : Column(
-//                           crossAxisAlignment: CrossAxisAlignment.start,
-//                           children: [
-//                             Text(
-//                               "Pendientes de Sincronizar",
-//                               style: TextStyle(
-//                                   fontWeight: FontWeight.normal,
-//                                   color: Colors.red),
-//                             ),
-//                             SizedBox(height: 4),
-//                             for (var i in registersPendigs)
-//                               Text(
-//                                 i.evento + " : " + i.cantidad.toString(),
-//                                 style: TextStyle(
-//                                     fontWeight: FontWeight.normal,
-//                                     color: Colors.red),
-//                               )
-//                           ],
-//                         ),
-//                 ),
-//               ),
-//               Expanded(
-//                 flex: 5,
-//                 child: Container(
-//                   child: Column(
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children: [
-//                       Text(
-//                         "INDICADORES DEL USUARIO ",
-//                         style: TextStyle(
-//                             fontSize: 12,
-//                             color: Colors.green,
-//                             fontWeight: FontWeight.bold),
-//                       ),
-//                       SizedBox(height: 5),
-//                       for (var indica in indicators)
-//                         //Icon(Icons.check_box_outline_blank),
-
-//                         Row(
-//                           children: [
-//                             Icon(
-//                               Icons.error_outline,
-//                               color: Colors.green,
-//                               size: 15.0,
-//                             ),
-//                             Text(
-//                               "  " +
-//                                   indica.strDescription.toString().trim() +
-//                                   " : " +
-//                                   indica.strValue.toString(),
-//                               style: TextStyle(
-//                                   fontSize: 10,
-//                                   fontWeight: FontWeight.normal,
-//                                   color: Colors.black),
-//                             ),
-//                           ],
-//                         )
-//                     ],
-//                   ),
-//                 ),
-//               ),
-//             ],
-//           ),
-//           Row(
-//             children: [Text(mensaje)],
-//           )
-//         ],
-//       ),
-//       /*child: Row(
-//         children: [Text("")],
-//       ),*/
-//     );
-//   }
-// }
 
 class Filtros {
   int flag;

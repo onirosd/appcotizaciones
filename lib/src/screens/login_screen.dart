@@ -27,6 +27,10 @@ import 'package:provider/provider.dart';
 // import 'package:image_downloader/image_downloader.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
+import '../providers/logo_provider.dart';
+import '../utils/image_result.dart';
+import '../utils/image_utils.dart';
+
 //import 'package:connectivity_plus/connectivity_plus.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -78,6 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     _connectivity.initialise();
     _connectivity.myStream.listen((source) {
+      print("🟡 Estado completo recibido: $source");
       if (mounted) {
         setState(() => _source = source);
       }
@@ -85,21 +90,26 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future getlastCompany() async {
-    LastCompanyCrt crt = new LastCompanyCrt();
-    // crt.getLastCompany();
+    LastCompanyCrt crt = LastCompanyCrt();
 
     try {
-      // setState(() {
+      List<LastCompany> result = await crt.getLastCompany();
 
-      crt.getLastCompany().then((value) {
-        if (value.length == 0) {
-          _lastCompany.add(new LastCompany(company: 0, lastDate: ''));
-        } else {
-          _lastCompany = value;
+      if (result.isEmpty) {
+        _lastCompany.add(LastCompany(company: 0, lastDate: ''));
+      } else {
+        _lastCompany = result;
+
+        // 🔽 Obtenemos la empresa por codCompany
+        CompanyCtr companyCtr = CompanyCtr();
+        Company? empresa = await companyCtr.getCompanyById(result[0].company!);
+
+        if (empresa != null && empresa.str_logopath != null) {
+          // 🔽 Cargamos el logo en el Provider
+          Provider.of<LogoProvider>(context, listen: false)
+              .setLogo(empresa.str_logopath!);
         }
-      });
-
-      // });
+      }
     } catch (err) {
       print(err);
     }
@@ -122,9 +132,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _isInternet =
-        _source.keys.toList()[0] == ConnectivityResult.none ? false : true;
-
+    _isInternet = _source.values
+        .first; // ✅ así obtienes directamente el booleano verdadero o falso
+    print(">>> estado de la conexion");
+    print(_isInternet);
     _mensaje_Internet = _isInternet ? 'Online' : 'Modo offline';
 
     ApiAutentication api = new ApiAutentication();
@@ -234,8 +245,7 @@ class __LoginForm2State extends State<_LoginForm2> {
   Widget build(BuildContext context) {
     final loginForm = Provider.of<AuthenticationProvider>(context);
 
-    _isInternet2 =
-        _source2.keys.toList()[0] == ConnectivityResult.none ? false : true;
+    _isInternet2 = _source2.values.first;
 
     return Container(
       child: Form(
@@ -281,6 +291,21 @@ class __LoginForm2State extends State<_LoginForm2> {
 
                           await getUsuarios(
                               int.parse(selectcompa.codCompany.toString()));
+
+                          ImageResult result =
+                              await ImageUtils.descargarYGuardarImagen(
+                            selectcompa.strLogo.toString(),
+                            selectcompa.str_image.toString(),
+                          );
+
+                          if (!result.hasError) {
+                            Provider.of<LogoProvider>(context, listen: false)
+                                .setLogo(result.path);
+                            ApiCompany apicompany = new ApiCompany();
+
+                            await apicompany.updateLogoPath(
+                                selectcompa.codCompany!, result.path!);
+                          }
 
                           EasyLoading.dismiss();
                           valdefault_selectcompa = 1;
@@ -366,7 +391,7 @@ class __LoginForm2State extends State<_LoginForm2> {
 
                           loginForm.isLoading = true;
 
-                          await Future.delayed(Duration(seconds: 1));
+                          // await Future.delayed(Duration(seconds: 1));
                           /* Obtenemos los datos de la empresa seleccionada*/
 
                           if (valdefault_selectcompa == 0) {
@@ -410,6 +435,7 @@ class __LoginForm2State extends State<_LoginForm2> {
                                   company: int.parse(
                                       selectcompa.codCompany!.toString()),
                                   lastDate: '');
+
                               await crt.insLastCompany(lastcompany);
 
                               /*#### ACTUALIZAMOS EL LASTCOMPANY SI SE LOGUEA CON EXITO ####*/
@@ -418,32 +444,32 @@ class __LoginForm2State extends State<_LoginForm2> {
                               /* Hacemos un try catch , para que recupera la imagen de la empresa 
                               si es que puede, si es que se tiene de internet */
 
-                              try {
-                                final ByteData byteData =
-                                    await NetworkAssetBundle(Uri.parse(
-                                            selectcompa.strLogo.toString()))
-                                        .load("");
-                                final Uint8List bytes =
-                                    byteData.buffer.asUint8List();
-                                String str_image =
-                                    selectcompa.str_image.toString();
-                                String dir =
-                                    (await getTemporaryDirectory()).path;
-                                String fullPath = '$dir/$str_image';
-                                File file = File(fullPath);
+                              // try {
+                              //   final ByteData byteData =
+                              //       await NetworkAssetBundle(Uri.parse(
+                              //               selectcompa.strLogo.toString()))
+                              //           .load("");
+                              //   final Uint8List bytes =
+                              //       byteData.buffer.asUint8List();
+                              //   String str_image =
+                              //       selectcompa.str_image.toString();
+                              //   String dir =
+                              //       (await getTemporaryDirectory()).path;
+                              //   String fullPath = '$dir/$str_image';
+                              //   File file = File(fullPath);
 
-                                await file.writeAsBytes(bytes);
-                                // print(">>> entramos aqui3");
-                                // print(file.path);
-                              } catch (error) {
-                                // print(">> salimos al catch");
-                                print(error);
-                              }
+                              //   await file.writeAsBytes(bytes);
+                              //   // print(">>> entramos aqui3");
+                              //   // print(file.path);
+                              // } catch (error) {
+                              //   // print(">> salimos al catch");
+                              //   print(error);
+                              // }
 
                               /*#### TRAEMOS LA IMAGEN DE LA EMPRESA QUE SELECCIONAMOS  ####*/
 
                               TiPersonCtr c1 = new TiPersonCtr();
-                              TiPerson person = TiPerson();
+                              TiPerson? person = TiPerson();
 
                               if (_isInternet2) {
                                 /* Obtenemos las reglas del usuario para la sesion actual */
@@ -480,7 +506,7 @@ class __LoginForm2State extends State<_LoginForm2> {
                                 /* Revisamos si es el mismo usuario el que se esta logueando en este celular, si es un distinto o es primer loguep , se eliminan
                                las tablas principales y complementarias , y se carga informacion de quotation, billings y complementos  */
 
-                                ResponseError resp = ResponseError(
+                                ResponseError? resp = ResponseError(
                                     description: '', error: 0, success: 0);
 
                                 ResponseError resp1 = ResponseError(
@@ -502,11 +528,23 @@ class __LoginForm2State extends State<_LoginForm2> {
                                   person = await c1.getdataPersonfromUser_V2(
                                       authResult.codUser);
 
+                                  // final results2 = await Future.wait([
+                                  //   configgeneral.executionRuleLoadComplements(
+                                  //       authResult.codUser,
+                                  //       1,
+                                  //       authResult.codCompany.toString()),
+                                  //   c1.getdataPersonfromUser_V2(
+                                  //       authResult.codUser),
+                                  // ]);
+
+                                  // resp = results2[0] as ResponseError?;
+                                  // person = results2[1] as TiPerson?;
+
                                   /* 2. sincronizamos las cotizaciones y recibos */
                                   resp1 = await configgeneral
                                       .executionRuleUploadSyncQuoBillLogueo(
                                           authResult.codUser,
-                                          person.strPosition.toString(),
+                                          person!.strPosition.toString(),
                                           authResult.codCompany.toString());
                                 } else {
                                   person = await c1.getdataPersonfromUser_V2(
@@ -523,7 +561,7 @@ class __LoginForm2State extends State<_LoginForm2> {
                                         authResult.codCompany,
                                         0);
 
-                                msg = resp.description +
+                                msg = resp!.description +
                                     "\n\n" +
                                     resp1.description;
 
@@ -563,6 +601,10 @@ class __LoginForm2State extends State<_LoginForm2> {
                               // print(authResult.strPosition.toString() +
                               //     " -----------------------------  ");
 
+                              // SharedPreferences prefs =
+                              //     await SharedPreferences.getInstance();
+                              // sh.setLogoPath(logoPath)
+                              // prefs.setString('logo_path', result.path);
                               sh.setPosition(person.strPosition.toString());
                               sh.setcodUser(authResult.codUser);
                               sh.setUser(authResult.strNameUser);

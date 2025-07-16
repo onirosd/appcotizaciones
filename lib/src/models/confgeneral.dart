@@ -39,15 +39,16 @@ class ConfGeneral {
 
   factory ConfGeneral.fromMap(Map<String, dynamic> map) {
     return ConfGeneral(
-      codconfigGeneral: map['codconfigGeneral'],
-      strCodOperation: map['strCodOperation'],
-      strDescription: map['strDescription'],
-      flgEnabled: map['flgEnabled'],
-      pivot1: map['pivot1'],
-      pivot2: map['pivot2'],
-      pivot3: map['pivot3'],
-      codUser: map['codUser'],
-      flgSync: map['flgSync'],
+      codconfigGeneral: map['codconfigGeneral'], // Obligatorio
+      strCodOperation:
+          map['strCodOperation'] ?? '', // Usa cadena vacía si no está presente
+      strDescription: map['strDescription'] ?? '', // Usa cadena vacía si falta
+      flgEnabled: map['flgEnabled'] ?? 0, // Usa 0 si no está presente
+      pivot1: map['pivot1'] ?? '', // Usa cadena vacía si falta
+      pivot2: map['pivot2'] ?? '', // Usa cadena vacía si falta
+      pivot3: map['pivot3'] ?? '', // Usa cadena vacía si falta
+      codUser: map['codUser'] ?? 0, // Usa 0 si no está presente
+      flgSync: map['flgSync'] ?? 0, // Usa 0 si no está presente
     );
   }
 

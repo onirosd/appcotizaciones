@@ -632,7 +632,7 @@ class _CustomerBillingConfirmState extends State<CustomerBillingConfirm> {
   Future<void> _createPDF(Company company) async {
     // Create a new PDF document.
     //Get external storage directory
-    final directory = await getExternalStorageDirectory();
+    final directory = await getApplicationDocumentsDirectory();
     io2.Directory appDocDirtTemp = await getTemporaryDirectory();
     String tempDirectory = appDocDirtTemp.path;
     //print(tempDirectory);
@@ -953,6 +953,7 @@ class _CustomerBillingConfirmState extends State<CustomerBillingConfirm> {
     await file.writeAsBytes(bytes, flush: true);
 
 //Open the PDF document in mobile
-    OpenFile.open('$path/${_imprimir.numRecibo}.pdf');
+    final result2 = await OpenFile.open(file.path);
+    print("OpenFile result: $result2");
   }
 }

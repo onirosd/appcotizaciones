@@ -29,12 +29,11 @@ class Reports {
     //Get external storage directory
 
     //final directory = rquotation.directory;
+    final directory = await getApplicationDocumentsDirectory();
     io2.Directory appDocDirtTemp = await getTemporaryDirectory();
     String tempDirectory = appDocDirtTemp.path;
     //print(tempDirectory);
-
-//Get directory path
-    final path = rquotation.path;
+    final path = directory!.path;
     //Create a new PDF document
     PdfDocument document = PdfDocument();
 
@@ -66,7 +65,7 @@ class Reports {
     //print(icono_company + "------------------------------------");
     PdfFont timesRoman = PdfStandardFont(PdfFontFamily.helvetica, 10);
     // PdfFont timesRomanBold =
-        // PdfStandardFont(PdfFontFamily.helvetica, 12, style: PdfFontStyle.bold);
+    // PdfStandardFont(PdfFontFamily.helvetica, 12, style: PdfFontStyle.bold);
 
     PdfFont timesRomanDet = PdfStandardFont(PdfFontFamily.helvetica, 10);
     PdfFont timesRomanBoldDet =
@@ -431,24 +430,17 @@ class Reports {
 
     print(rquotation.quotationfin.total.toString());
 
-
     String subtotal = toCurrencyString(
-      rquotation.quotationfin.subTotal.toString(),
-      thousandSeparator: ThousandSeparator.Comma
-      /*decimalSeparator: '.',*/
-    );
+        rquotation.quotationfin.subTotal.toString(),
+        thousandSeparator: ThousandSeparator.Comma
+        /*decimalSeparator: '.',*/
+        );
 
+    String igv = toCurrencyString(rquotation.quotationfin.lgv.toString(),
+        thousandSeparator: ThousandSeparator.Comma);
 
-    String igv = toCurrencyString(
-      rquotation.quotationfin.lgv.toString(),
-      thousandSeparator: ThousandSeparator.Comma
-    );
-
-
-    String total = toCurrencyString(
-      rquotation.quotationfin.total.toString(),
-      thousandSeparator: ThousandSeparator.Comma
-    );
+    String total = toCurrencyString(rquotation.quotationfin.total.toString(),
+        thousandSeparator: ThousandSeparator.Comma);
 
     /* comenzamos a preveer desbordamiento */
 
@@ -794,14 +786,21 @@ class Reports {
         ? 'temporal_name'
         : rquotation.quotationfin.id;
 
-//Create an empty file to write PDF data
+    //Create an empty file to write PDF data
     final file = io2.File('$path/$name_pdf.pdf');
 
-//Write PDF data
+    //Write PDF data
     await file.writeAsBytes(bytes, flush: true);
 
-//Open the PDF document in mobile
-    OpenFile.open('$path/$name_pdf.pdf');
+    //Open the PDF document in mobile
+    // OpenFile.open('$path/$name_pdf.pdf');
+    try {
+      final result = await OpenFile.open(file.path);
+
+      print(result.message);
+    } catch (e) {
+      print('Error al abrir el archivo: $e');
+    }
   }
 
   void reportsFormatoSimple(ReportDataQuotation rquotation) async {
@@ -809,12 +808,12 @@ class Reports {
     //Get external storage directory
 
     //final directory = rquotation.directory;
+    //final directory = rquotation.directory;
+    final directory = await getApplicationDocumentsDirectory();
     io2.Directory appDocDirtTemp = await getTemporaryDirectory();
     String tempDirectory = appDocDirtTemp.path;
     //print(tempDirectory);
-
-//Get directory path
-    final path = rquotation.path;
+    final path = directory!.path;
     //Create a new PDF document
     PdfDocument document = PdfDocument();
 
@@ -828,17 +827,17 @@ class Reports {
     //PdfBrush solidBrush = PdfSolidBrush(PdfColor(150, 148, 148));
     Rect bounds = Rect.fromLTWH(0, -10, graphics.clientSize.width, 30);
 
-//Draws a rectangle to place the heading in that region
+    //Draws a rectangle to place the heading in that region
     //  graphics.drawRectangle(brush: solidBrush, bounds: bounds);
 
-//Creates a font for adding the heading in the page
+    //Creates a font for adding the heading in the page
     PdfFont subHeadingFont = PdfStandardFont(PdfFontFamily.helvetica, 14);
 
-//Creates a text element to add the invoice number
+    //Creates a text element to add the invoice number
     PdfTextElement element = PdfTextElement(text: '', font: subHeadingFont);
     element.brush = PdfBrushes.white;
 
-//Draws the heading on the page
+    //Draws the heading on the page
     PdfLayoutResult result = element.draw(
         page: page, bounds: Rect.fromLTWH(10, bounds.top + 0, 0, 0))!;
     //String currentDate = ''; //'DATE ________';
@@ -1049,20 +1048,20 @@ class Reports {
         bounds: Rect.fromLTWH(
             135, result.bounds.bottom - separacion_todos_det, 0, 0))!;
 
-/* CREAMOS PDF  */
+    /* CREAMOS PDF  */
 
-//Creates a PDF grid
+    //Creates a PDF grid
     PdfGrid grid = PdfGrid();
 
-//Add the columns to the grid
+    //Add the columns to the grid
     grid.columns.add(count: 11);
 
-//Add header to the grid
+    //Add header to the grid
     grid.headers.add(1);
 
     grid.repeatHeader = true;
 
-//Set values to the header cells
+    //Set values to the header cells
     PdfGridRow header = grid.headers[0];
     header.cells[0].value = 'Nro.';
     header.cells[1].value = 'Codigo';
@@ -1076,7 +1075,7 @@ class Reports {
     header.cells[8].value = 'Precio Unit.';
     header.cells[10].value = 'Precio Final';
 
-//Creates the header style
+    //Creates the header style
     PdfGridCellStyle headerStyle = PdfGridCellStyle();
     headerStyle.borders.all = PdfPen(PdfColor(126, 151, 173));
     headerStyle.backgroundBrush = PdfSolidBrush(PdfColor(126, 151, 173));
@@ -1084,7 +1083,7 @@ class Reports {
     headerStyle.font = PdfStandardFont(PdfFontFamily.helvetica, 11,
         style: PdfFontStyle.regular);
 
-//Adds cell customizations
+    //Adds cell customizations
     // for (int i = 0; i < header.cells.count; i++) {
     //   if (i == 0 || i == 1) {
     //     header.cells[i].stringFormat = PdfStringFormat(
@@ -1098,7 +1097,7 @@ class Reports {
     //   header.cells[i].style = headerStyle;
     // }
 
-//Add rows to grid
+    //Add rows to grid
     PdfGridRow row = grid.rows.add();
     int contador = 0;
 
@@ -1147,16 +1146,16 @@ class Reports {
       contador = contador + 1;
     });
 
-//Set padding for grid cells
+    //Set padding for grid cells
     grid.style.cellPadding = PdfPaddings(left: 2, right: 2, top: 2, bottom: 2);
 
-//Creates the grid cell styles
+    //Creates the grid cell styles
     PdfGridCellStyle cellStyle = PdfGridCellStyle();
     cellStyle.borders.all = PdfPens.white;
     cellStyle.borders.bottom = PdfPen(PdfColor(217, 217, 217), width: 0.70);
     cellStyle.font = PdfStandardFont(PdfFontFamily.helvetica, 11);
     cellStyle.textBrush = PdfSolidBrush(PdfColor(131, 130, 136));
-//Adds cell customizations
+    //Adds cell customizations
     // for (int i = 0; i < grid.rows.count; i++) {
     //   PdfGridRow row = grid.rows[i];
     //   for (int j = 0; j < row.cells.count; j++) {
@@ -1173,7 +1172,7 @@ class Reports {
     //   }
     // }
 
-//Creates layout format settings to allow the table pagination
+    //Creates layout format settings to allow the table pagination
     PdfLayoutFormat layoutFormat =
         PdfLayoutFormat(layoutType: PdfLayoutType.paginate);
 
@@ -1208,11 +1207,11 @@ class Reports {
     // grid.columns[9].format = format;
     grid.columns[10].format = format;
 
-//Apply built-in table style.
+    //Apply built-in table style.
     grid.applyBuiltInStyle(PdfGridBuiltInStyle.listTable6ColorfulAccent1,
         settings: tableStyleOption);
 
-//Draws the grid to the PDF page
+    //Draws the grid to the PDF page
     PdfLayoutResult gridResult = grid.draw(
         page: page,
         bounds: Rect.fromLTWH(0, result.bounds.bottom + 20,
@@ -1226,7 +1225,8 @@ class Reports {
 
     String subtotal = toCurrencyString(
       rquotation.quotationfin.subTotal.toString(),
-      thousandSeparator: ThousandSeparator.Comma, // Usa coma como separador de miles
+      thousandSeparator:
+          ThousandSeparator.Comma, // Usa coma como separador de miles
     );
 
     String igv = toCurrencyString(
@@ -1238,7 +1238,6 @@ class Reports {
       rquotation.quotationfin.total.toString(),
       thousandSeparator: ThousandSeparator.Comma,
     );
-
 
     /* comenzamos a preveer desbordamiento */
 
@@ -1601,14 +1600,20 @@ class Reports {
         ? 'temporal_name'
         : rquotation.quotationfin.id;
 
-//Create an empty file to write PDF data
+    //Create an empty file to write PDF data
     final file = io2.File('$path/$name_pdf.pdf');
 
-//Write PDF data
+    //Write PDF data
     await file.writeAsBytes(bytes, flush: true);
 
-//Open the PDF document in mobile
-    OpenFile.open('$path/$name_pdf.pdf');
+    //Open the PDF document in mobile
+    // OpenFile.open('$path/$name_pdf.pdf');
+
+    try {
+      final result = await OpenFile.open(file.path);
+    } catch (e) {
+      print('Error al abrir el archivo: $e');
+    }
   }
 }
 
@@ -1617,12 +1622,11 @@ void reportsFormatoSimpleIGV(ReportDataQuotation rquotation) async {
   //Get external storage directory
 
   //final directory = rquotation.directory;
+  final directory = await getApplicationDocumentsDirectory();
   io2.Directory appDocDirtTemp = await getTemporaryDirectory();
   String tempDirectory = appDocDirtTemp.path;
   //print(tempDirectory);
-
-//Get directory path
-  final path = rquotation.path;
+  final path = directory!.path;
   //Create a new PDF document
   PdfDocument document = PdfDocument();
 
@@ -1636,17 +1640,17 @@ void reportsFormatoSimpleIGV(ReportDataQuotation rquotation) async {
   //PdfBrush solidBrush = PdfSolidBrush(PdfColor(150, 148, 148));
   Rect bounds = Rect.fromLTWH(0, -10, graphics.clientSize.width, 30);
 
-//Draws a rectangle to place the heading in that region
+  //Draws a rectangle to place the heading in that region
   //  graphics.drawRectangle(brush: solidBrush, bounds: bounds);
 
-//Creates a font for adding the heading in the page
+  //Creates a font for adding the heading in the page
   PdfFont subHeadingFont = PdfStandardFont(PdfFontFamily.helvetica, 14);
 
-//Creates a text element to add the invoice number
+  //Creates a text element to add the invoice number
   PdfTextElement element = PdfTextElement(text: '', font: subHeadingFont);
   element.brush = PdfBrushes.white;
 
-//Draws the heading on the page
+  //Draws the heading on the page
   PdfLayoutResult result = element.draw(
       page: page, bounds: Rect.fromLTWH(10, bounds.top + 0, 0, 0))!;
   //String currentDate = ''; //'DATE ________';
@@ -1847,20 +1851,20 @@ void reportsFormatoSimpleIGV(ReportDataQuotation rquotation) async {
       bounds: Rect.fromLTWH(
           135, result.bounds.bottom - separacion_todos_det, 0, 0))!;
 
-/* CREAMOS PDF  */
+  /* CREAMOS PDF  */
 
-//Creates a PDF grid
+  //Creates a PDF grid
   PdfGrid grid = PdfGrid();
 
-//Add the columns to the grid
+  //Add the columns to the grid
   grid.columns.add(count: 11);
 
-//Add header to the grid
+  //Add header to the grid
   grid.headers.add(1);
 
   grid.repeatHeader = true;
 
-//Set values to the header cells
+  //Set values to the header cells
   PdfGridRow header = grid.headers[0];
   header.cells[0].value = 'Nro.';
   header.cells[1].value = 'Codigo';
@@ -1874,7 +1878,7 @@ void reportsFormatoSimpleIGV(ReportDataQuotation rquotation) async {
   header.cells[8].value = 'Precio Unit';
   header.cells[10].value = 'Precio Final';
 
-//Creates the header style
+  //Creates the header style
   PdfGridCellStyle headerStyle = PdfGridCellStyle();
   headerStyle.borders.all = PdfPen(PdfColor(126, 151, 173));
   headerStyle.backgroundBrush = PdfSolidBrush(PdfColor(126, 151, 173));
@@ -1882,7 +1886,7 @@ void reportsFormatoSimpleIGV(ReportDataQuotation rquotation) async {
   headerStyle.font =
       PdfStandardFont(PdfFontFamily.helvetica, 11, style: PdfFontStyle.regular);
 
-//Adds cell customizations
+  //Adds cell customizations
   // for (int i = 0; i < header.cells.count; i++) {
   //   if (i == 0 || i == 1) {
   //     header.cells[i].stringFormat = PdfStringFormat(
@@ -1896,7 +1900,7 @@ void reportsFormatoSimpleIGV(ReportDataQuotation rquotation) async {
   //   header.cells[i].style = headerStyle;
   // }
 
-//Add rows to grid
+  //Add rows to grid
   PdfGridRow row = grid.rows.add();
   int contador = 0;
 
@@ -1949,16 +1953,16 @@ void reportsFormatoSimpleIGV(ReportDataQuotation rquotation) async {
     contador = contador + 1;
   });
 
-//Set padding for grid cells
+  //Set padding for grid cells
   grid.style.cellPadding = PdfPaddings(left: 2, right: 2, top: 2, bottom: 2);
 
-//Creates the grid cell styles
+  //Creates the grid cell styles
   PdfGridCellStyle cellStyle = PdfGridCellStyle();
   cellStyle.borders.all = PdfPens.white;
   cellStyle.borders.bottom = PdfPen(PdfColor(217, 217, 217), width: 0.70);
   cellStyle.font = PdfStandardFont(PdfFontFamily.helvetica, 11);
   cellStyle.textBrush = PdfSolidBrush(PdfColor(131, 130, 136));
-//Adds cell customizations
+  //Adds cell customizations
   // for (int i = 0; i < grid.rows.count; i++) {
   //   PdfGridRow row = grid.rows[i];
   //   for (int j = 0; j < row.cells.count; j++) {
@@ -1975,7 +1979,7 @@ void reportsFormatoSimpleIGV(ReportDataQuotation rquotation) async {
   //   }
   // }
 
-//Creates layout format settings to allow the table pagination
+  //Creates layout format settings to allow the table pagination
   PdfLayoutFormat layoutFormat =
       PdfLayoutFormat(layoutType: PdfLayoutType.paginate);
 
@@ -2009,11 +2013,11 @@ void reportsFormatoSimpleIGV(ReportDataQuotation rquotation) async {
   // grid.columns[9].format = format;
   grid.columns[10].format = format;
 
-//Apply built-in table style.
+  //Apply built-in table style.
   grid.applyBuiltInStyle(PdfGridBuiltInStyle.listTable6ColorfulAccent1,
       settings: tableStyleOption);
 
-//Draws the grid to the PDF page
+  //Draws the grid to the PDF page
   PdfLayoutResult gridResult = grid.draw(
       page: page,
       bounds: Rect.fromLTWH(0, result.bounds.bottom + 20,
@@ -2393,12 +2397,17 @@ void reportsFormatoSimpleIGV(ReportDataQuotation rquotation) async {
       ? 'temporal_name'
       : rquotation.quotationfin.id;
 
-//Create an empty file to write PDF data
+  //Create an empty file to write PDF data
   final file = io2.File('$path/$name_pdf.pdf');
 
-//Write PDF data
+  //Write PDF data
   await file.writeAsBytes(bytes, flush: true);
 
-//Open the PDF document in mobile
-  OpenFile.open('$path/$name_pdf.pdf');
+  //Open the PDF document in mobile
+  // OpenFile.open('$path/$name_pdf.pdf');
+  try {
+    final result = await OpenFile.open(file.path);
+  } catch (e) {
+    print('Error al abrir el archivo: $e');
+  }
 }

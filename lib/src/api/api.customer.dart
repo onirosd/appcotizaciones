@@ -19,16 +19,11 @@ class CustomerApiProvider {
       DIR_URL + "Appstock/controller/services/insertarCustomer.php";
 
   Future<List<Customer>> getAllCustomer() async {
-    // CustomerCtr crt = new CustomerCtr();
-
     final response = await http.get(Uri.parse(_url_get_customer),
         headers: {"Content-Type": "application/json"});
 
     List list = json.decode(response.body);
 
-    //return data.map((customer) async {
-    //crt.createCustomer(Customer.fromMap(customer));
-    //});
     return list.map((job) => new Customer.fromMap(job)).toList();
     //return (response.data as List).map((customer) {}).toList();
   }
@@ -55,7 +50,7 @@ class CustomerApiProvider {
 
   Future<ResponseError> uploadCustomers(List<Customer> customers) async {
     ResponseError error =
-        new ResponseError(description: "", error: 0, success: 0);
+        new ResponseError(description: "", error: 1, success: 0);
     final response = await http.post(
       Uri.parse(_url_pos_customer),
       headers: <String, String>{
@@ -64,7 +59,7 @@ class CustomerApiProvider {
       body: jsonEncode(customers),
     );
 
-    print(jsonEncode(customers));
+    print(jsonDecode(response.body));
     //print(response.statusCode);
 
     if (response.statusCode == 200) {
@@ -79,6 +74,7 @@ class CustomerApiProvider {
       if (er == 1) {
         error.error = cant > 0 ? 2 : 1;
         error.description = description;
+        error.success = 1;
       } else {
         error.description = description;
       }

@@ -133,7 +133,8 @@ class _CustomerBillingEditState extends State<CustomerBillingEdit> {
   }
 
   final ButtonStyle raisedButtonStyle = ElevatedButton.styleFrom(
-    foregroundColor: Colors.black87, backgroundColor: Colors.grey[300],
+    foregroundColor: Colors.black87,
+    backgroundColor: Colors.grey[300],
     minimumSize: Size(300, 72),
     padding: EdgeInsets.symmetric(horizontal: 16),
     shape: const RoundedRectangleBorder(
@@ -804,7 +805,7 @@ class _CustomerBillingEditState extends State<CustomerBillingEdit> {
   Future<void> _createPDF(Company company) async {
     // Create a new PDF document.
     //Get external storage directory
-    final directory = await getExternalStorageDirectory();
+    final directory = await getApplicationDocumentsDirectory();
     io2.Directory appDocDirtTemp = await getTemporaryDirectory();
     String tempDirectory = appDocDirtTemp.path;
     //print(tempDirectory);
@@ -1122,6 +1123,7 @@ class _CustomerBillingEditState extends State<CustomerBillingEdit> {
     await file.writeAsBytes(bytes, flush: true);
 
 //Open the PDF document in mobile
-    OpenFile.open('$path/${_imprimir.numRecibo}.pdf');
+    final result2 = await OpenFile.open(file.path);
+    print("OpenFile result: $result2");
   }
 }

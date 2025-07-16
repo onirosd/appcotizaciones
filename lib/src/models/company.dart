@@ -21,6 +21,7 @@ class Company {
   String? campo9;
   String? campo10;
   String? str_image;
+  String? str_logopath;
 
   Company({
     this.codCompany,
@@ -43,6 +44,7 @@ class Company {
     this.campo9,
     this.campo10,
     this.str_image,
+    this.str_logopath,
   });
 
   Company copyWith({
@@ -66,6 +68,7 @@ class Company {
     String? campo9,
     String? campo10,
     String? str_image,
+    String? str_logopath,
   }) {
     return Company(
       codCompany: codCompany ?? this.codCompany,
@@ -88,6 +91,7 @@ class Company {
       campo9: campo9 ?? this.campo9,
       campo10: campo10 ?? this.campo10,
       str_image: str_image ?? this.str_image,
+      str_logopath: str_logopath ?? this.str_logopath,
     );
   }
 
@@ -154,6 +158,9 @@ class Company {
     if (str_image != null) {
       result.addAll({'str_image': str_image});
     }
+    if (str_logopath != null) {
+      result.addAll({'str_logopath': str_logopath});
+    }
 
     return result;
   }
@@ -180,6 +187,7 @@ class Company {
       campo9: map['campo9'],
       campo10: map['campo10'],
       str_image: map['str_image'],
+      str_logopath: map['str_logopath'],
     );
   }
 
@@ -190,7 +198,7 @@ class Company {
 
   @override
   String toString() {
-    return 'Company(codCompany: $codCompany, strDesCompany: $strDesCompany, strRucCompany: $strRucCompany, strAddress: $strAddress, strPhone: $strPhone, strLogo: $strLogo, strPrintFormat: $strPrintFormat, codCurrency: $codCurrency, numImpuesto: $numImpuesto, campo1: $campo1, campo2: $campo2, campo3: $campo3, campo4: $campo4, campo5: $campo5, campo6: $campo6, campo7: $campo7, campo8: $campo8, campo9: $campo9, campo10: $campo10, str_image: $str_image)';
+    return 'Company(codCompany: $codCompany, strDesCompany: $strDesCompany, strRucCompany: $strRucCompany, strAddress: $strAddress, strPhone: $strPhone, strLogo: $strLogo, strPrintFormat: $strPrintFormat, codCurrency: $codCurrency, numImpuesto: $numImpuesto, campo1: $campo1, campo2: $campo2, campo3: $campo3, campo4: $campo4, campo5: $campo5, campo6: $campo6, campo7: $campo7, campo8: $campo8, campo9: $campo9, campo10: $campo10, str_image: $str_image, str_logopath: $str_logopath)';
   }
 
   @override
@@ -217,7 +225,8 @@ class Company {
         other.campo8 == campo8 &&
         other.campo9 == campo9 &&
         other.campo10 == campo10 &&
-        other.str_image == str_image;
+        other.str_image == str_image &&
+        other.str_logopath == str_logopath;
   }
 
   @override
@@ -241,6 +250,7 @@ class Company {
         campo8.hashCode ^
         campo9.hashCode ^
         campo10.hashCode ^
-        str_image.hashCode;
+        str_image.hashCode ^
+        str_logopath.hashCode;
   }
 }

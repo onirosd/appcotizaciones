@@ -24,7 +24,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:image_picker/image_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:appcotizaciones/src/constants/listsubtipomultimedia.dart';
 import 'package:unique_identifier/unique_identifier.dart';
 
@@ -78,8 +78,8 @@ class _CustomerGalleryNewState extends State<CustomerGalleryNew> {
   );
 
   final _space = SizedBox(height: 8);
-  // final ImagePicker _picker = ImagePicker();
-  // List<XFile>? _imageFileList;
+  final ImagePicker _picker = ImagePicker();
+  List<XFile>? _imageFileList;
   List<i.File>? _imageListSend;
   var _listItems = ['Foto', 'Adjuntar'];
   String _item = 'Foto';
@@ -155,9 +155,9 @@ class _CustomerGalleryNewState extends State<CustomerGalleryNew> {
     });
   }
 
-  // void _setImageFileListFromFile(XFile? value) {
-  //   _imageFileList = value == null ? null : <XFile>[value];
-  // }
+  void _setImageFileListFromFile(XFile? value) {
+    _imageFileList = value == null ? null : <XFile>[value];
+  }
 
   Future<void> _deleteCacheDir() async {
     var tempDir = await getTemporaryDirectory();
@@ -180,23 +180,23 @@ class _CustomerGalleryNewState extends State<CustomerGalleryNew> {
   Future<void> _onImageButtonPressed(ImageSource source,
       {BuildContext? context, bool isMultiImage = false}) async {
     try {
-      // final XFile? pickedFile = await _picker.pickImage(
-      //   source: source,
-      //   // maxWidth: 50,
-      //   // maxHeight: 50,
-      //   imageQuality: 90,
-      // );
+      final XFile? pickedFile = await _picker.pickImage(
+        source: source,
+        // maxWidth: 50,
+        // maxHeight: 50,
+        imageQuality: 90,
+      );
       setState(() {
-        // _setImageFileListFromFile(pickedFile);
-        // if (_imageFileList != null) {
-        //   _url = _imageFileList![0].path;
-        //   FIle_send filess = new FIle_send(path: _url);
-        //   urls.add(filess);
+        _setImageFileListFromFile(pickedFile);
+        if (_imageFileList != null) {
+          _url = _imageFileList![0].path;
+          FIle_send filess = new FIle_send(path: _url);
+          urls.add(filess);
 
-        //   print(urls);
-        // } else {
-        //   _url = 'No tenemos foto seleccionada ';
-        // }
+          print(urls);
+        } else {
+          _url = 'No tenemos foto seleccionada ';
+        }
       });
     } catch (e) {
       setState(() {
@@ -711,8 +711,8 @@ class _CustomerGalleryNewState extends State<CustomerGalleryNew> {
                                             children: [
                                               ElevatedButton(
                                                 onPressed: () {
-                                                  var opcion = null;
-                                                  //ImageSource.camera;
+                                                  var opcion =
+                                                      ImageSource.camera;
 
                                                   _onImageButtonPressed(opcion,
                                                       context: context);
@@ -747,8 +747,8 @@ class _CustomerGalleryNewState extends State<CustomerGalleryNew> {
                                                 onPressed: _flagadjuntar == 0
                                                     ? null
                                                     : () {
-                                                        var opcion = null;
-                                                        //ImageSource.gallery;
+                                                        var opcion =
+                                                            ImageSource.gallery;
 
                                                         _onImageButtonPressed(
                                                             opcion,
@@ -1356,8 +1356,6 @@ class _CustomerGalleryNewState extends State<CustomerGalleryNew> {
     return Multimediaaddsubt();
   }
 }
-
-class ImageSource {}
 
 class FIle_send {
   String path;
