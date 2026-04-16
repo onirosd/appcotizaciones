@@ -15,6 +15,7 @@ import 'package:appcotizaciones/src/constants/listProdModify.dart';
 import 'package:appcotizaciones/src/models/product_model.dart';
 import 'package:appcotizaciones/src/models/quotation_product_model.dart';
 //import 'package:flutter_application_1/models/product_model.dart';
+import 'package:appcotizaciones/src/helpers/product_subtotal_helper.dart';
 import 'package:appcotizaciones/src/utils/constants.dart';
 import 'package:appcotizaciones/src/utils/size_config.dart';
 import 'package:appcotizaciones/src/widgets/widgets.dart';
@@ -752,89 +753,40 @@ class _ProductAddEditFormState extends State<ProductAddEditForm> {
   }
 
   void _calculamosSubTotal(int catProd, double minval, double maxval) {
-    //print("entramos");
-    double diam = double.parse(diameterController.text.trim() == ''
-        ? '0'
-        : diameterController.text.trim());
-    //double.parse(diametro);
-    double anch = double.parse(internoController.text.trim() == ''
-        ? '0'
-        : internoController.text.trim());
-    double larg = double.parse(
-        longController.text.trim() == '' ? '0' : longController.text.trim());
-    double cantid = double.parse(amountController.text.trim() == ''
-        ? '0'
-        : amountController.text.trim());
-    double peso = 0;
-    double price = 0;
+    final result = ProductSubtotalHelper.calcular(
+      categoriaProducto: catProd,
+      diametro: double.parse(
+          diameterController.text.trim() == '' ? '0' : diameterController.text.trim()),
+      interno: double.parse(
+          internoController.text.trim() == '' ? '0' : internoController.text.trim()),
+      longitud: double.parse(
+          longController.text.trim() == '' ? '0' : longController.text.trim()),
+      cantidad: double.parse(
+          amountController.text.trim() == '' ? '0' : amountController.text.trim()),
+      empaque: int.parse(empaqueController.text),
+      precioTexto: priceController.text,
+      precioMinimo: minval,
+      precioMaximo: maxval,
+      igv: double.parse(ListItems.listIgv[0]),
+    );
 
-    if (cantid % int.parse(empaqueController.text) != 0) {
-      setState(() {});
-      // amountController.text = 0 as String;
-      print("entreamos aqui");
-      _msg_alert_empaque = "Error : Cantidad debe ser multiplo del empaque";
+    if (!result.empaqueValido) {
+      setState(() {
+        _msg_alert_empaque = result.mensajeEmpaque;
+      });
       return;
-    } else {
-      setState(() {});
+    }
+
+    setState(() {
       _msg_alert_empaque = "";
-    }
+    });
 
-    // print(diam);
-    // print(larg);
-    // print(cantid);
-    // print(anch);
-    if (catProd == 1) {
-      // print("entramos a 1");
-      peso = ((diam * diam * 0.595 * (larg + 5) / 100000) -
-              (anch * anch * 0.625 * larg / 100000)) *
-          cantid *
-          1.07;
-    }
-    if (catProd == 2) {
-      peso = (((diam * diam * 0.616 * (larg + 5)) / 100) * cantid) / 1000;
-    }
-    if (catProd == 3) {
-      peso = (diam * anch * larg * 8.55 * cantid) / 1000000;
-    }
-    if (catProd == 4) {
-      peso = diam * diam * 0.23 * ((larg / 1000) + 0.005) / 100 * cantid;
-    }
-    if (catProd == 5) {
-      peso = (diam * diam * 0.83 * larg * cantid) / 100000;
-    }
-    if (catProd == 6) {
-      peso = (diam * anch * larg * 2.93 * cantid) / 1000000;
-    }
-    if (catProd == 7) {
-      peso = (diam * anch * larg * 8.05 * cantid) / 1000000;
-    }
-    if (catProd == 8) {
-      peso = cantid;
-    }
-    if (catProd == 9) {
-      peso = ((diam * 1 * larg) / 1000) * cantid;
-    }
+    weightController.text = result.pesoTexto;
+    subTotalController.text = result.subTotalTexto;
 
-    peso = double.parse(peso.toStringAsFixed(2).toString());
-    weightController.text = peso.toStringAsFixed(2).toString();
-
-    if (priceController.text.toString().trim() != '') {
-      if (double.parse(priceController.text) >= minval &&
-          double.parse(priceController.text) <= maxval) {
-        // print("porque");
-        price = double.parse(priceController.text);
-        double subtotal = price * peso;
-
-        double igv = double.parse(ListItems.listIgv[0]);
-        totalconigv.text = (subtotal + (subtotal * igv)).toStringAsFixed(2);
-        precioconigv.text = (price + (price * igv)).toStringAsFixed(2);
-        subTotalController.text = subtotal.toStringAsFixed(2);
-      } else {
-        // print("entramos");
-        subTotalController.text = '0';
-      }
-    } else {
-      subTotalController.text = '0';
+    if (result.totalConIgvTexto != null && result.precioConIgvTexto != null) {
+      totalconigv.text = result.totalConIgvTexto!;
+      precioconigv.text = result.precioConIgvTexto!;
     }
   }
 
