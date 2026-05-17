@@ -1508,7 +1508,7 @@ class _CustomerQuotationCopyState extends State<CustomerQuotationCopy> {
       row.cells[6].value = quotproduct.long;
       row.cells[7].value = quotproduct.quantity;
       row.cells[8].value =
-          double.parse(quotproduct.theoretical_weight).toStringAsFixed(2);
+          double.parse(quotproduct.theoretical_weight).toStringAsFixed(3);
       row.cells[9].value =
           (double.parse(quotproduct.unity_price.toString()) % 1 != 0
                   ? double.parse(quotproduct.unity_price.toString())

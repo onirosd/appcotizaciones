@@ -33,7 +33,7 @@ class ProductSubtotalHelper {
       return ProductSubtotalResult(
         empaqueValido: false,
         mensajeEmpaque: "Error : Cantidad debe ser multiplo del empaque",
-        pesoTexto: "0.00",
+        pesoTexto: "0.000",
         subTotalTexto: "0",
         totalConIgvTexto: null,
         precioConIgvTexto: null,
@@ -66,7 +66,11 @@ class ProductSubtotalHelper {
           cantidad;
     }
     if (categoriaProducto == 5) {
-      peso = (diametro * diametro * 0.82 * longitud * cantidad) / 100000;
+      // Categoria 5 debe usar el diametro interno ingresado por usuario.
+      // Si no existe interno (> 0), mantenemos fallback al diametro de catalogo.
+      final diametroBase = interno > 0 ? interno : diametro;
+      peso = (diametroBase * diametroBase * 0.82 * longitud * cantidad) /
+          100000;
     }
     if (categoriaProducto == 6) {
       peso = (diametro * interno * longitud * 2.8 * cantidad) / 1000000;
@@ -81,8 +85,9 @@ class ProductSubtotalHelper {
       peso = ((diametro * 1 * longitud) / 1000) * cantidad;
     }
 
-    peso = double.parse(peso.toStringAsFixed(2));
-    final pesoTexto = peso.toStringAsFixed(2);
+    // Mostrar el peso con 3 decimales, pero mantener el valor interno
+    // con precision completa para evitar doble redondeo en subtotal.
+    final pesoTexto = peso.toStringAsFixed(3);
 
     if (precioTexto.trim() == '') {
       return ProductSubtotalResult(
