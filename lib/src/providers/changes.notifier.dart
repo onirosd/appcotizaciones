@@ -24,11 +24,13 @@ class MyConnectivity {
   void _checkStatus(ConnectivityResult result) async {
     bool isOnline = false;
     try {
-      final result = await InternetAddress.lookup('google.com');
-      isOnline = result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+      final lookupResult = await InternetAddress.lookup('google.com');
+      isOnline =
+          lookupResult.isNotEmpty && lookupResult[0].rawAddress.isNotEmpty;
     } on SocketException catch (_) {
       isOnline = false;
     }
+
     if (!_controller.isClosed) {
       _controller.sink.add({result: isOnline});
     }

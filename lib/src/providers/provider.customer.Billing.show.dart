@@ -132,8 +132,8 @@ class _CustomerBillingShowState extends State<CustomerBillingShow> {
   }
 
   final ButtonStyle raisedButtonStyle = ElevatedButton.styleFrom(
-    onPrimary: Colors.black87,
-    primary: Colors.grey[300],
+    foregroundColor: Colors.black87,
+    backgroundColor: Colors.grey[300],
     minimumSize: Size(300, 72),
     padding: EdgeInsets.symmetric(horizontal: 16),
     shape: const RoundedRectangleBorder(
@@ -433,7 +433,7 @@ class _CustomerBillingShowState extends State<CustomerBillingShow> {
                               const SizedBox(height: 10),
                               OutlinedButton(
                                 style: ElevatedButton.styleFrom(
-                                  primary: Colors.green,
+                                  backgroundColor: Colors.green,
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 50, vertical: 20),
                                   textStyle: const TextStyle(
@@ -480,7 +480,7 @@ class _CustomerBillingShowState extends State<CustomerBillingShow> {
                               const SizedBox(height: 10),
                               OutlinedButton(
                                 style: ElevatedButton.styleFrom(
-                                  primary: Colors.green,
+                                  backgroundColor: Colors.green,
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 50, vertical: 20),
                                   textStyle: const TextStyle(
@@ -581,13 +581,16 @@ class _CustomerBillingShowState extends State<CustomerBillingShow> {
   Future<void> _createPDF(Company company) async {
     // Create a new PDF document.
     //Get external storage directory
-    final directory = await getExternalStorageDirectory();
+    final directory = await getApplicationDocumentsDirectory();
     io2.Directory appDocDirtTemp = await getTemporaryDirectory();
-    String tempDirectory = appDocDirtTemp.path;
-    //print(tempDirectory);
 
-//Get directory path
+    // aqui obtenemos la ruta de las imagenes temporales
+    String tempDirectory = appDocDirtTemp.path;
+    print("IMPRESION TEMPORAL : " + tempDirectory);
+
+    // Aqui guardamos el archivo pdf generado
     final path = directory!.path;
+    print("IMPRESION PATH : " + path);
 
     //Create a new PDF document
     PdfDocument document = PdfDocument();
@@ -900,7 +903,11 @@ class _CustomerBillingShowState extends State<CustomerBillingShow> {
 //Write PDF data
     await file.writeAsBytes(bytes, flush: true);
 
-//Open the PDF document in mobile
-    OpenFile.open('$path/${_imprimir.numRecibo}.pdf');
+    final result2 = await OpenFile.open(file.path);
+    print("OpenFile result: $result2");
+
+// //Open the PDF document in mobile
+//     OpenFile.open('$path/${_imprimir.numRecibo}.pdf');
+//     print("OpenFile result: $result");
   }
 }

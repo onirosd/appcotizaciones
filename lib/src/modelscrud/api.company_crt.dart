@@ -14,6 +14,23 @@ class ApiCompany {
     return 3;
   }
 
+  Future<void> updateLogoPath(int codCompany, String newPath) async {
+    CompanyCtr crt = CompanyCtr();
+
+    // Obtener la empresa por su codCompany
+    Company? empresa = await crt.getCompanyById(codCompany);
+
+    if (empresa != null) {
+      // Crear una copia actualizada con el nuevo path del logo
+      Company empresaActualizada = empresa.copyWith(str_logopath: newPath);
+
+      // Ejecutar el update
+      await crt.updateCompany(empresaActualizada);
+    } else {
+      print("⚠️ Empresa con codCompany $codCompany no encontrada.");
+    }
+  }
+
   Future<List<Company>> syncCompanyfromApi() async {
     CompanyApiProvider api = new CompanyApiProvider();
     CompanyCtr crt = new CompanyCtr();
@@ -26,14 +43,22 @@ class ApiCompany {
     //print(contador);
 
     if (contador > 0) {
+      List<Company> empresasLocales = await crt.getAllCompany();
+      Map<int, String> logosLocales = {
+        for (var c in empresasLocales) c.codCompany!: c.str_logopath ?? ''
+      };
+
+// Elimina solo si es necesario, o reemplaza de uno en uno
       await crt.deleteAllCompany();
 
-      Company compa =
-          new Company(codCompany: 0, strDesCompany: 'Elegir Empresa');
-      crt.insertCompany(compa);
+      Company compa = Company(codCompany: 0, strDesCompany: 'Elegir Empresa');
+      await crt.insertCompany(compa);
 
-      for (var i = 0; i < contador; i++) {
-        Company company = data[i];
+      for (var company in data) {
+        // Si existe un logo local, se lo volvemos a asignar
+        if (logosLocales.containsKey(company.codCompany)) {
+          company.str_logopath = logosLocales[company.codCompany];
+        }
         await crt.insertCompany(company);
       }
     }

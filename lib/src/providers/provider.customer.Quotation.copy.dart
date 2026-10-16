@@ -44,7 +44,7 @@ import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 import 'package:appcotizaciones/src/screens/product_edit_form.dart';
-import 'package:flutter_masked_text/flutter_masked_text.dart';
+import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 
 import '../models/company.dart';
 import '../modelscrud/company_crt.dart';
@@ -837,7 +837,7 @@ class _CustomerQuotationCopyState extends State<CustomerQuotationCopy> {
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.orange,
+                  backgroundColor: Colors.orange,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
                   textStyle: const TextStyle(
@@ -1075,7 +1075,7 @@ class _CustomerQuotationCopyState extends State<CustomerQuotationCopy> {
       width: double.infinity,
       child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-              primary: Colors.white,
+              backgroundColor: Colors.white,
               side: BorderSide(
                 width: 5.0,
                 color: Colors.grey.shade400,
@@ -1156,9 +1156,6 @@ class _CustomerQuotationCopyState extends State<CustomerQuotationCopy> {
     List<Currency> currency2 = currency
         .where((o) => o.codCurrency == updQuotation.currencyId)
         .toList();
-
-    final controller = new MoneyMaskedTextController(
-        decimalSeparator: '.', thousandSeparator: ',');
 
     // Create a new PDF document.
     //Get external storage directory
@@ -1511,7 +1508,7 @@ class _CustomerQuotationCopyState extends State<CustomerQuotationCopy> {
       row.cells[6].value = quotproduct.long;
       row.cells[7].value = quotproduct.quantity;
       row.cells[8].value =
-          double.parse(quotproduct.theoretical_weight).toStringAsFixed(2);
+          double.parse(quotproduct.theoretical_weight).toStringAsFixed(3);
       row.cells[9].value =
           (double.parse(quotproduct.unity_price.toString()) % 1 != 0
                   ? double.parse(quotproduct.unity_price.toString())
@@ -1582,14 +1579,20 @@ class _CustomerQuotationCopyState extends State<CustomerQuotationCopy> {
 
     // print(_quotat_final.total.toString());
 
-    controller.updateValue(double.parse(updQuotation.subTotal.toString()));
-    String subtotal = controller.numberValue.toString();
+    String subtotal = toCurrencyString(
+      updQuotation.subTotal.toString(),
+      thousandSeparator: ThousandSeparator.Comma, // Usa coma como separador de miles
+    );
 
-    controller.updateValue(double.parse(updQuotation.lgv.toString()));
-    String igv = controller.numberValue.toString();
+    String igv = toCurrencyString(
+      updQuotation.lgv.toString(),
+      thousandSeparator: ThousandSeparator.Comma,
+    );
 
-    controller.updateValue(double.parse(updQuotation.total.toString()));
-    String total = controller.numberValue.toString();
+    String total = toCurrencyString(
+      updQuotation.total.toString(),
+      thousandSeparator: ThousandSeparator.Comma,
+    );
 
     /* comenzamos a preveer desbordamiento */
 

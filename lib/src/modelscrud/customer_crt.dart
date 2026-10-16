@@ -3,17 +3,8 @@ import 'package:appcotizaciones/src/helpers/database_helper.dart';
 import 'package:appcotizaciones/src/models/customer.dart';
 import 'package:sqflite/sqflite.dart';
 
-//import 'dart:async';
-//import 'package:simple_form_crud/data/database_helper.dart';
 class CustomerCtr {
   DatabaseHelper con = new DatabaseHelper();
-//insertion
-  /*Future<int> saveCustomer(Customer customer) async {
-    var dbCustomer = await con.db;
-    int res = await dbCustomer.insert("Customer", customer.toMap());
-    return res;
-  }
-*/
 
   Future<int> batchInsertCustomers(List<Customer> listcustomers) async {
     var dbconn = await con.db;
@@ -44,8 +35,6 @@ class CustomerCtr {
   }
 
   Future<int> createCustomer(Customer newCustomer) async {
-    //await deleteCustomer(newCustomer.codCustomer!);
-    //await deleteAllCustomer();
     var dbCustomer = await con.db;
     int res = await dbCustomer.insert('Customer', newCustomer.toMap());
 
@@ -62,23 +51,10 @@ class CustomerCtr {
     // return res;
   }
 
-  /*Future<List<Customer>> getAllCustomer() async {
-    var dbCustomer = await con.db;
-    var res = await dbCustomer.query("Customer");
-
-    List<Customer> list =
-        res.isNotEmpty ? res.map((c) => Customer.fromMap(c)).toList() : null;
-    return list;
-  }
-*/
-
   insertCustomer(Customer customer) async {
     // Get a reference to the database.
 
     var dbCustomer = await con.db;
-    //var maxcodCustomer = await dbCustomer.rawQuery(
-    //  "SELECT MAX(codCustomer)+1 as last_inserted_id FROM Customer");
-    //customer.codCustomer = maxcodCustomer.first["last_inserted_id"];
     var raw = await dbCustomer.insert(
       'Customer',
       customer.toMap(),
@@ -152,15 +128,4 @@ class CustomerCtr {
 
     return maps.map((c) => Customer.fromMap(c)).toList();
   }
-
-  /*Future<Customer> checkCustomer(String customer, String password) async {
-    var dbCustomer = await con.db;
-    var res = await dbCustomer.rawQuery("SELECT * FROM Customer WHERE username = '$user' and password = '$password'");
-    
-    if (res.length > 0) {
-      return new User.fromMap(res.first);
-    }
-    return null;
-  }*/
-
 }

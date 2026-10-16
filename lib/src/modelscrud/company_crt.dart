@@ -65,4 +65,25 @@ class CompanyCtr {
 
     return res;
   }
+
+  Future<Company?> getCompanyById(int codCompany) async {
+    final db = await con.db;
+    final res = await db
+        .query("Company", where: "codCompany = ?", whereArgs: [codCompany]);
+
+    if (res.isNotEmpty) {
+      return Company.fromMap(res.first);
+    }
+    return null;
+  }
+
+  Future<int> updateCompany(Company company) async {
+    final db = await con.db;
+    return await db.update(
+      "Company",
+      company.toMap(),
+      where: "codCompany = ?",
+      whereArgs: [company.codCompany],
+    );
+  }
 }

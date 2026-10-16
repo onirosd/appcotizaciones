@@ -88,12 +88,6 @@ class ApiConfigGeneral {
 
     configuracion = await crt.getConfigGeneralforUserforRule("CleanTables");
 
-    /* await crt.getConfigGeneralforUserforRule("CleanTables").then((value) async {
-      configuracion = value;
-      print(configuracion.toString());
-    });
-    */
-
     // obtenemos datos de esta regla siempre en cuando este con valor 1  , osea
     // que el de bd, quiere que se limpie las tablas de este usuario
     try {
@@ -171,9 +165,6 @@ class ApiConfigGeneral {
     /* Esta validacion ya no va porque siempre se tiene que hacer la 
        actualizacion  por ser registro nuevo   */
 
-    // ConfGeneral confiini =
-    //     await crt.getConfigGeneralforUserforRule("LoadCustomer");
-
     List<Customer> customerData = await crt_customer.getCustomernoSincronice();
     if (customerData.length > 0) {
       resp = await api_customer.uploadCustomers(customerData);
@@ -183,6 +174,8 @@ class ApiConfigGeneral {
           customer.asyncFlag = 2;
           await crt_customer.updateCustomerOnebyOne(customer);
         }
+        resp.error =
+            0; // Si se subieron los clientes con exito , entonces cambiamos el error a 0
       }
 
       SyncLogCtr crt2 = new SyncLogCtr();
@@ -517,12 +510,10 @@ class ApiConfigGeneral {
     ConfGeneral configuracion =
         await crt.getConfigGeneralforUserforRule("LoadCustomer");
 
-    ComplementsCustomerGalleries crt1 = new ComplementsCustomerGalleries();
-
     if (configuracion.codconfigGeneral > 0 || forzar == 1) {
-      // try {
+      ComplementsCustomerGalleries crt1 = new ComplementsCustomerGalleries();
       List<ComplementsCustoGalle> ListaCustomerGaleries =
-          await crt1.uploadComplementsCustomerGalleries(codempresa, codUser);
+          await crt1.downloadComplementsCustomerGalleries(codempresa, codUser);
 
       if (ListaCustomerGaleries[0].customer.length > 0) {
         await crt.deleteCustomerandGaleriesfinish();

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:appcotizaciones/src/models/sysSendEmpresa.dart';
+import 'package:appcotizaciones/src/modelscrud/complementscustomergallery_crt.dart';
 import 'package:http/http.dart' as http;
 import 'package:sqflite/sqflite.dart';
 
@@ -21,92 +23,69 @@ class ComplementsCustomerGalleries {
   var url_upload_galleries =
       DIR_URL + "Appstock/controller/services/insertarGalleries.php";
 
-  Future<List<ComplementsCustoGalle>> uploadComplementsCustomerGalleries(
+  Future<List<ComplementsCustoGalle>> downloadComplementsCustomerGalleries(
       int codempresa, int codUser) async {
-    // ResponseError error =
-    //     new ResponseError(description: "", error: 0, success: 0);
-
     send_empresa reqe =
         new send_empresa(codEmpresa: codempresa, codUser: codUser);
-    List data = [];
 
+    final payload = jsonEncode(reqe);
     try {
       final response = await http.post(
         Uri.parse(url_complements),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
+          'Accept-Encoding': 'gzip'
         },
-        body: jsonEncode(reqe),
+        body: payload,
       );
 
-      if (response.statusCode == 200) {
-        data = json.decode(response.body);
-        //  print(data);
-      }
-    } catch (e) {}
+      final isGzip =
+          response.headers['content-encoding']?.contains('gzip') ?? false;
+      final bytes = response.bodyBytes;
+      final String decodedJson = utf8.decode(response.bodyBytes);
+      final parsedJson = json.decode(decodedJson);
 
-    return data.map((job) => new ComplementsCustoGalle.fromMap(job)).toList();
+      if (response.statusCode == 200) {
+        print(">> entramos");
+        // final List<dynamic> data = jsonDecode(response.body);
+        // return data.map((e) => ComplementsCustoGalle.fromMap(e)).toList();
+        if (parsedJson is List && parsedJson.isNotEmpty) {
+          print(
+              "Terminamos Download de Customer, Galleries y llevamos esto a sqlite");
+          return [ComplementsCustoGalle.fromMap(parsedJson[0])];
+          // return [];
+        }
+
+        if (parsedJson is Map && parsedJson.containsKey('error')) {
+          print("Error desde API: ${parsedJson['description']}");
+          return [];
+        }
+
+        print("Estructura inesperada: $parsedJson");
+        return [];
+      } else {
+        print("Error HTTP ${response.statusCode}:");
+        print(decodedJson);
+        return [];
+      }
+    } catch (e) {
+      print("Excepción al obtener complementos: $e");
+      return [];
+    }
   }
 
   Future<ResponseError> batchInsertComplementscustogalle(
       List<ComplementsCustoGalle> complements) async {
-    var dbconn = await con.db;
-    Batch batch = dbconn.batch();
+    // var dbconn = await con.db;
+    // Batch batch = dbconn.batch();
     int estado = 0;
     ResponseError responseerror =
         new ResponseError(description: '', error: 1, success: 0);
 
-    List<Customer>? listCustomer = complements[0].customer;
-    List<Gallery>? listGallery = complements[0].gallery;
-    List<GalleryDetail>? listGalleryDetail = complements[0].galleryDetail;
-    List<GalleryDetailSubtipos>? listGalleryDetailSubtipos =
-        complements[0].galleriesdetailsubtipos;
+    ComplementsCustomerGalleriesCrud crud =
+        new ComplementsCustomerGalleriesCrud();
 
-    if (listCustomer.length > 0) {
-      listCustomer.forEach((customer) {
-        batch.insert('Customer', customer.toMap());
-      });
-      // queryDelet = queryDelet + " DELETE FROM Company;  ";
-    }
-
-    if (listGallery.length > 0) {
-      // batch.delete('QuotationProducts'); //('Company', company.toMap());
-      listGallery.forEach((gallery) {
-        batch.insert('Gallery', gallery.toMap());
-      });
-      // queryDelet = queryDelet + " DELETE FROM Company;  ";
-    }
-
-    if (listGalleryDetail.length > 0) {
-      // batch.delete('Billing'); //('Company', company.toMap());
-      listGalleryDetail.forEach((gallerydetail) {
-        batch.insert('GalleryDetail', gallerydetail.toMap());
-      });
-    }
-
-    if (listGalleryDetailSubtipos.length > 0) {
-      // batch.delete('Billing'); //('Company', company.toMap());
-      listGalleryDetailSubtipos.forEach((gallerydetailsubtipos) {
-        batch.insert('GalleryDetailSubtipos', gallerydetailsubtipos.toMap());
-      });
-    }
-    // queryDelet = queryDelet + " DELETE FROM Company;  ";
-
-    try {
-      // await deleteDataComplements(queryDelet);
-      await batch.commit(continueOnError: false);
-      responseerror.error = 0;
-      responseerror.success = 1;
-      responseerror.description =
-          'Carga Clientes,Imagenes : Tablas de Clientes y Galerias Sincronizadas con Exito';
-    } catch (e) {
-      estado = 0;
-
-      responseerror.description = 'Carga Clientes,Imagenes : ' + e.toString();
-
-      print(e.toString());
-    }
-
+    responseerror = await crud.insertAllComplements(complements);
     return responseerror;
   }
 
@@ -118,8 +97,8 @@ class ComplementsCustomerGalleries {
 
     // print(jsondata);
 
-    ResponseError error =
-        new ResponseError(description: "", error: 0, success: 0);
+    // ResponseError error =
+    //     new ResponseError(description: "", error: 0, success: 0);
     final response = await http.post(
       Uri.parse(url_upload_galleries),
       headers: <String, String>{
@@ -128,87 +107,17 @@ class ComplementsCustomerGalleries {
       body: jsondata,
     );
 
-    //print(response.statusCode);
+    final error = ResponseError(description: '', error: 1, success: 0);
 
     if (response.statusCode == 200) {
-      // If the server did return a 201 CREATED response,
-      // then parse the JSON.
-      //final respon = jsonDecode(response.body);
-      Map<String, dynamic> map = jsonDecode(response.body);
-      String description = map['description'];
-      int er = map['error'];
-      int cant = map['cant'];
-
-      if (er == 1) {
-        error.error = cant > 0 ? 2 : 1;
-        error.description = description;
-      } else {
-        error.description = description;
-      }
-
-      //print(respon["error"]);
-      //return Customer.fromJson(jsonDecode(response.body));
+      final Map<String, dynamic> map = jsonDecode(response.body);
+      error.description = map['description'];
+      error.error = map['cant'] > 0 ? 2 : 1;
+      // result.success = map['error'] == 0 ? 1 : 0;
     } else {
       error.description = response.body.toString();
     }
 
     return error;
   }
-}
-
-class send_empresa {
-  int codEmpresa;
-  int codUser;
-
-  send_empresa({
-    required this.codEmpresa,
-    required this.codUser,
-  });
-
-  send_empresa copyWith({
-    int? codEmpresa,
-    int? codUser,
-  }) {
-    return send_empresa(
-      codEmpresa: codEmpresa ?? this.codEmpresa,
-      codUser: codUser ?? this.codUser,
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    final result = <String, dynamic>{};
-
-    result.addAll({'codEmpresa': codEmpresa});
-    result.addAll({'codUser': codUser});
-
-    return result;
-  }
-
-  factory send_empresa.fromMap(Map<String, dynamic> map) {
-    return send_empresa(
-      codEmpresa: map['codEmpresa']?.toInt() ?? 0,
-      codUser: map['codUser']?.toInt() ?? 0,
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory send_empresa.fromJson(String source) =>
-      send_empresa.fromMap(json.decode(source));
-
-  @override
-  String toString() =>
-      'send_empresa(codEmpresa: $codEmpresa, codUser: $codUser)';
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-
-    return other is send_empresa &&
-        other.codEmpresa == codEmpresa &&
-        other.codUser == codUser;
-  }
-
-  @override
-  int get hashCode => codEmpresa.hashCode ^ codUser.hashCode;
 }

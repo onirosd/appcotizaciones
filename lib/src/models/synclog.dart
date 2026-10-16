@@ -32,13 +32,13 @@ class SyncLog {
 
   factory SyncLog.fromMap(Map<String, dynamic> map) {
     return SyncLog(
-      codLog: map['codLog'],
-      dteSyncDate: map['dteSyncDate'],
-      strDay: map['strDay'],
-      strhour: map['strhour'],
-      codUser: map['codUser'],
-      seccion: map['seccion'],
-      strMessage: map['strMessage'],
+      codLog: map['codLog'], // Obligatorio
+      dteSyncDate: map['dteSyncDate'] ?? 0, // Usa 0 si falta
+      strDay: map['strDay'] ?? '', // Usa cadena vacía si falta
+      strhour: map['strhour'] ?? '', // Usa cadena vacía si falta
+      codUser: map['codUser'] ?? 0, // Usa 0 si falta
+      seccion: map['seccion'] ?? '', // Usa cadena vacía si falta
+      strMessage: map['strMessage'] ?? '', // Usa cadena vacía si falta
     );
   }
 
