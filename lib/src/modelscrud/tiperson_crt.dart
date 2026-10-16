@@ -1,6 +1,4 @@
-import 'package:appcotizaciones/src/models/tilist.dart';
 import 'package:appcotizaciones/src/models/tiperson.dart';
-import 'package:flutter/material.dart';
 import 'package:appcotizaciones/src/helpers/database_helper.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -39,8 +37,10 @@ class TiPersonCtr {
 
     var person = await dbCustomer.rawQuery(
         "SELECT codPerson FROM Autentication where codUser = $cod LIMIT 1");
-    var codPerson =
-        person.first["codPerson"] == null ? 0 : person.first["codPerson"];
+    if (person.isEmpty || person.first["codPerson"] == null) {
+      return [];
+    }
+    var codPerson = person.first["codPerson"];
 
     final List<Map<String, dynamic>> maps = await dbCustomer.rawQuery(
         "SELECT * FROM Ti_Person WHERE codPerson = $codPerson LIMIT 1");
@@ -55,23 +55,20 @@ class TiPersonCtr {
   Future<TiPerson> getdataPersonfromUser_V2(int codUser) async {
     var dbCustomer = await con.db;
     String cod = codUser.toString();
-    List<Map<String, dynamic>> maps = [];
     TiPerson tiperson = new TiPerson(
         codPerson: 0, strCelphone: "", strDesPerson: "", strPosition: "");
 
     var person = await dbCustomer.rawQuery(
         "SELECT codPerson FROM Autentication where codUser = $cod LIMIT 1");
-    var codPerson =
-        person.first["codPerson"] == null ? 0 : person.first["codPerson"];
+    if (person.isEmpty || person.first["codPerson"] == null) {
+      return tiperson;
+    }
+    var codPerson = person.first["codPerson"];
 
     final List<Map<String, dynamic>> maps2 = await dbCustomer.rawQuery(
         "SELECT * FROM Ti_Person WHERE codPerson = $codPerson LIMIT 1");
 
-    print(
-        ">>>>> 1 ñeeeee ==>> esta tabla esta viniendo vacio Ti_Person , revisar");
-    print(maps2);
-
-    if (maps2.first["codPerson"] != null) {
+    if (maps2.isNotEmpty && maps2.first["codPerson"] != null) {
       tiperson.codPerson = maps2.first["codPerson"];
       tiperson.strCelphone = maps2.first["strCelphone"];
       tiperson.strDesPerson = maps2.first["strDesPerson"];

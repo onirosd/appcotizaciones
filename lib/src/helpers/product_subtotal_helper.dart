@@ -44,39 +44,34 @@ class ProductSubtotalHelper {
     double price = 0;
 
     if (categoriaProducto == 1) {
-      peso = ((diametro * diametro * 0.62 * (longitud + 5) / 100000) -
-              (interno * interno * 0.62 * longitud / 100000)) *
-          cantidad *
-          1.07;
+      peso =
+          (((diametro + 1) * (diametro + 1) * 0.0062 * (longitud + 5) / 1000) -
+                  (interno * interno * 0.0062 * (longitud + 5) / 1000)) *
+              cantidad;
     }
     if (categoriaProducto == 2) {
       peso =
-          (((diametro * diametro * 0.62 * (longitud + 5)) / 100) * cantidad) /
-              1000;
+          (diametro * diametro * 0.0062 * ((longitud + 5) / 1000) * cantidad);
     }
     if (categoriaProducto == 3) {
-      peso = (diametro * interno * longitud * 8.025 * cantidad) / 1000000;
+      peso =
+          (diametro * (interno + 5) * (longitud + 5) * 8 * cantidad) / 1000000;
     }
     if (categoriaProducto == 4) {
-      peso = diametro *
-          diametro *
-          0.23 *
-          ((longitud / 1000) + 0.005) /
-          100 *
-          cantidad;
+      peso = diametro * diametro * 0.00225 * ((longitud + 5) / 1000) * cantidad;
     }
     if (categoriaProducto == 5) {
       // Categoria 5 debe usar el diametro interno ingresado por usuario.
       // Si no existe interno (> 0), mantenemos fallback al diametro de catalogo.
-      final diametroBase = interno > 0 ? interno : diametro;
-      peso = (diametroBase * diametroBase * 0.82 * longitud * cantidad) /
-          100000;
+      peso = (diametro * diametro * 0.008 * (longitud + 5) * cantidad) / 1000;
     }
     if (categoriaProducto == 6) {
-      peso = (diametro * interno * longitud * 2.8 * cantidad) / 1000000;
+      peso = (diametro * (interno + 5) * (longitud + 5) * 2.84 * cantidad) /
+          1000000;
     }
     if (categoriaProducto == 7) {
-      peso = (diametro * interno * longitud * 8.05 * cantidad) / 1000000;
+      peso = (diametro * (interno + 5) * (longitud + 5) * 0.0079 * cantidad) /
+          1000;
     }
     if (categoriaProducto == 8) {
       peso = cantidad;
@@ -87,7 +82,7 @@ class ProductSubtotalHelper {
 
     // Mostrar el peso con 3 decimales, pero mantener el valor interno
     // con precision completa para evitar doble redondeo en subtotal.
-    final pesoTexto = peso.toStringAsFixed(3);
+    final pesoTexto = peso.toStringAsFixed(2);
 
     if (precioTexto.trim() == '') {
       return ProductSubtotalResult(

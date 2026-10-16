@@ -169,9 +169,6 @@ class _ProviderHome extends State<ProviderHome> {
 
     if (this.mounted) {
       _getPreferences();
-      Future.delayed(Duration.zero, () async {
-        await _getPreferences();
-      });
     }
 
     // print(_dataPerson.toString() + "------  entrando en init --------");
