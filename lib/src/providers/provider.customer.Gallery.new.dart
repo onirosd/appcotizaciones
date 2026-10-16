@@ -69,7 +69,7 @@ class _CustomerGalleryNewState extends State<CustomerGalleryNew> {
 
   final ButtonStyle _raisedButtonStyle = ElevatedButton.styleFrom(
     //onPrimary: Colors.black,
-    primary: Colors.blue,
+    backgroundColor: Colors.blue,
     minimumSize: Size(300, 72),
     padding: EdgeInsets.symmetric(horizontal: 16),
     shape: const RoundedRectangleBorder(
@@ -836,7 +836,7 @@ class _CustomerGalleryNewState extends State<CustomerGalleryNew> {
 
                                     ElevatedButton(
                                       style: ElevatedButton.styleFrom(
-                                        primary: Colors.green,
+                                        backgroundColor: Colors.green,
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 50, vertical: 20),
                                         textStyle: const TextStyle(
@@ -1019,7 +1019,6 @@ class _CustomerGalleryNewState extends State<CustomerGalleryNew> {
                                                                   "ALERTA : Tuvimos errores al insertar en la galeria !")));
                                                     }
                                                     //Aqui en este punto guardamos
-
                                                   } else {
                                                     ScaffoldMessenger.of(
                                                             context)
@@ -1314,7 +1313,7 @@ class _CustomerGalleryNewState extends State<CustomerGalleryNew> {
       width: double.infinity,
       child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-              primary: Color.fromARGB(255, 47, 151, 241)),
+              backgroundColor: Color.fromARGB(255, 47, 151, 241)),
           onPressed: ListItems.sel_tipomultimedia == 0
               ? null
               : () {

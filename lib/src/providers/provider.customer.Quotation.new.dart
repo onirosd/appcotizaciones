@@ -878,7 +878,7 @@ class _CustomerQuotationNewState extends State<CustomerQuotationNew> {
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.orange,
+                  backgroundColor: Colors.orange,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
                   textStyle: const TextStyle(
@@ -917,7 +917,7 @@ class _CustomerQuotationNewState extends State<CustomerQuotationNew> {
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.green,
+                  backgroundColor: Colors.green,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
                   textStyle: const TextStyle(
@@ -1171,7 +1171,7 @@ class _CustomerQuotationNewState extends State<CustomerQuotationNew> {
       width: double.infinity,
       child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-              primary: Colors.white,
+              backgroundColor: Colors.white,
               side: BorderSide(
                 width: 5.0,
                 color: Colors.grey.shade400,

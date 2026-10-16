@@ -1,77 +1,129 @@
-# appcotizaciones
+# AppCotizaciones
 
-A new Flutter project.
+Aplicacion movil Flutter para gestion de cotizaciones, recibos y sincronizacion de datos comerciales.
 
-## Getting Started
+## Descripcion General
 
-This project is a starting point for a Flutter application.
+Este proyecto permite:
+- Gestionar cotizaciones y recibos desde movil.
+- Trabajar con estados de pre-proceso, pendiente de sincronizacion y sincronizado.
+- Sincronizar datos maestros y transaccionales con servicios remotos.
 
-A few resources to get you started if this is your first Flutter project:
+> Base del README antiguo: este proyecto nace como "A new Flutter project" y mantiene recursos oficiales de Flutter para onboarding.
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+## Recursos Iniciales (Flutter)
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Si es tu primer proyecto Flutter, estos recursos siguen siendo utiles:
+- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
+- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- [Flutter Documentation](https://docs.flutter.dev/)
 
-- generar apk
+## Apartado Tecnico
 
-cmd : flutter build apk --debug --no-sound-null-safety
+### Stack Principal
+- Framework: Flutter
+- Lenguaje: Dart
+- Estado de null safety: proyecto legado con dependencias mixtas
+- Persistencia local: `sqflite`
+- Estado global/DI simple: `provider`
+- HTTP: `http`
 
-------------------------------------
+### Versiones Reales del Proyecto (actual)
 
+Versiones tomadas de la configuracion del repositorio y SDK local del proyecto:
 
-### Estados ###
+- Flutter SDK: `3.10.5`
+- Dart SDK: `3.0.5`
+- DevTools: `2.23.1`
+- Restriccion de SDK en `pubspec.yaml`: `>=3.0.5 <4.0.0`
+- Android Gradle Plugin (AGP): `7.3.0` (`android/build.gradle`)
+- Kotlin Gradle Plugin: `1.8.0` (`android/build.gradle`)
+- Gradle Wrapper: `7.5` (`android/gradle/wrapper/gradle-wrapper.properties`)
+- Java target/source en app: `11` (`android/app/build.gradle`)
+- Android `compileSdkVersion`: definido por Flutter (`flutter.compileSdkVersion`)
+- Android `minSdkVersion`: definido por Flutter (`flutter.minSdkVersion`)
+- Android `targetSdkVersion`: definido por Flutter (`flutter.targetSdkVersion`)
 
-column state : 
+### Nota de compatibilidad importante
 
-0 : Pre Procesado
-1 : Procesado pendiente de sincronizar
-2 : Procesado sincronizado
+Para evitar conflictos por instalaciones globales de Flutter, este proyecto debe ejecutarse con el SDK local:
+- `D:\apps\v2\appcotizaciones\.fvm\flutter_sdk`
 
-5 : Es una  actualizacion del supervisor  , y si  la columna  updateflg es igual a 1 , estos registros
-van a actualizar en el mobil con estado 2.
+Si se ejecuta con otro Flutter global (mas nuevo), pueden aparecer errores de Gradle/Kotlin no relacionados al codigo funcional de la app.
 
+## Reglas Funcionales de Estados
 
-### Customer ###
+### Estados generales (`state`)
+- `0`: Pre Procesado
+- `1`: Procesado pendiente de sincronizar
+- `2`: Procesado sincronizado
+- `5`: Actualizacion del supervisor. Si `updateflg == 1`, esos registros actualizan en movil con estado `2`.
 
-column flg_sinc
+### Customer (`flg_sinc`)
+- `0`: Pendiente de sincronizar en movil
+- `2`: Sincronizado con exito en nube y movil
 
-esta columna puede tener 2 estados
+Precaucion:
+- Evitar enviar customers con `codigo = 0` desde base de datos, porque puede generar duplicados en movil cuando se recarga informacion al iniciar sesion.
 
-0 = pendiente de sincronizar en el mobil
-2 = esta sincronizado con exito en la nube y mobil
+### Cotizaciones y Recibos
+- Registros con `updateflg != -1` y/o `flgSync != -1` se consideran pendientes de sincronizacion.
 
+## Comandos para Levantar el Proyecto
 
-* tener cuidado si mandamos un customer con codiog cero de la base de datos.
-en el mobil se duplicaria varias veces, ya que esa tabla se trae al iniciar el logueo
+## 1) Validar version correcta (recomendado)
 
+```powershell
+.\.fvm\flutter_sdk\bin\flutter.bat --version
+```
 
-### Cotizaciones y Recibos ###
+Debe mostrar Flutter `3.10.5` y Dart `3.0.5`.
 
-updateflg != -1
-lgSync != -1
+## 2) Instalar dependencias
 
-estos registros hacen referencia a que estan pendientes de sincronizar
+```powershell
+.\.fvm\flutter_sdk\bin\flutter.bat pub get
+```
 
+## 3) Ejecutar en modo debug
 
-* version de android
-">=2.12.0 <3.0.0"
+```powershell
+.\.fvm\flutter_sdk\bin\flutter.bat run --enable-software-rendering
+```
 
-### Configuracion para desarrollo de apk  appcotizaciones ###
+Alternativa con script helper:
 
-flutter 3.0.0
-java 8
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run_flutter_3105.ps1
+```
 
-app/buildgradle
+## 4) Generar APK
 
-compileSdkVersion 31
-minSdkVersion 19
-targetSdkVersion 31
+APK debug:
+```powershell
+.\.fvm\flutter_sdk\bin\flutter.bat build apk --debug --no-sound-null-safety
+```
 
-android/buildgradle
-classpath 'com.android.tools.build:gradle:7.3.0'
+APK release:
+```powershell
+.\.fvm\flutter_sdk\bin\flutter.bat build apk
+```
 
-wrapper/gradle-wrapper.properties
-distributionUrl=https\://services.gradle.org/distributions/gradle-7.5-all.zip
+Salida esperada del APK:
+- `build\app\outputs\flutter-apk\app-debug.apk`
+- `build\app\outputs\flutter-apk\app-release.apk`
+
+## Configuracion Android (referencia rapida)
+
+- Archivo AGP/Kotlin: `android/build.gradle`
+- Archivo modulo app Android: `android/app/build.gradle`
+- Wrapper Gradle: `android/gradle/wrapper/gradle-wrapper.properties`
+- SDK Flutter usado por Android: `android/local.properties` (`flutter.sdk=...`)
+
+## Troubleshooting rapido
+
+- Si `flutter run` falla con plugin loader/Gradle:
+  - Verificar que se usa `.\.fvm\flutter_sdk\bin\flutter.bat` y no `flutter` global.
+- Si aparecen mensajes de Kotlin incompatibles pero el APK se genera:
+  - Revisar primero version de Flutter activa.
+  - Limpiar y reconstruir con SDK local del proyecto.

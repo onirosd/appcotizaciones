@@ -31,6 +31,10 @@ class ComplementsQuoBillApiProvider {
         position: position,
         cod_company: cod_company);
 
+    final payload = jsonEncode(reqe);
+    print("[SyncBillQuotation] URL: $url_complements");
+    print("[SyncBillQuotation] Payload: $payload");
+
     List data = [];
 
     try {
@@ -39,14 +43,28 @@ class ComplementsQuoBillApiProvider {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(reqe),
+        body: payload,
       );
 
+      print("[SyncBillQuotation] HTTP ${response.statusCode}");
+      print("[SyncBillQuotation] Raw response:");
+      print(response.body);
+
       if (response.statusCode == 200) {
-        data = json.decode(response.body);
-        //  print(data);
+        final dynamic parsed = json.decode(response.body);
+        data = parsed is List ? parsed : <dynamic>[];
+
+        if (parsed is Map<String, dynamic>) {
+          final String? message =
+              (parsed['description'] ?? parsed['msg'])?.toString();
+          if (message != null && message.isNotEmpty) {
+            print("[SyncBillQuotation] Mensaje API: $message");
+          }
+        }
       }
-    } catch (e) {}
+    } catch (e) {
+      print("[SyncBillQuotation] Excepcion: $e");
+    }
 
     return data.map((job) => new ComplementsBillQuo.fromMap(job)).toList();
   }

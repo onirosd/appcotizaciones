@@ -14,8 +14,16 @@ class AuthenticationProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  String _pasoActual = '';
+  String get pasoActual => _pasoActual;
+
   set isLoading(bool value) {
     _isLoading = value;
+    notifyListeners();
+  }
+
+  void setPaso(String paso) {
+    _pasoActual = paso;
     notifyListeners();
   }
 

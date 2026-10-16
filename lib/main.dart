@@ -1,45 +1,30 @@
-//import 'package:appcotizaciones/src/pages/page.customer.new.dart';
-//import 'package:appcotizaciones/src/pages/page.home.dart';
-//import 'package:appcotizaciones/src/pages/main_page.dart';
-//import 'package:appcotizaciones/src/providers/bottom_navigation.text';
-//import 'package:appcotizaciones/src/preferences/MyPreferences.dart';
-// vemore que as
-
 import 'package:appcotizaciones/src/preferences/sharedpreferencestest.dart';
+import 'package:appcotizaciones/src/providers/authentication_provider.dart';
 import 'package:appcotizaciones/src/providers/changes.notifier.dart';
 import 'package:appcotizaciones/src/providers/customer_provider.dart';
 import 'package:appcotizaciones/src/routes/routes.dart';
 import 'package:appcotizaciones/src/screens/login_screen.dart';
+import 'package:appcotizaciones/src/services/permissions_service.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:appcotizaciones/src/providers/logo_provider.dart';
 
-/*
-Future<File> getImageFileFromAssets(String path) async {
-  final byteData = await rootBundle.load('assets/$path');
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-  final file = File('${(await getTemporaryDirectory()).path}/$path');
-  await file.writeAsBytes(byteData.buffer
-      .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-
-  return file;
-}
-*/
-void main() {
-  //print("entrando aqui primero");
-  //getImageFileFromAssets('files/user.png');
+  // Solicita permisos al inicio
+  final PermissionService permissionService = PermissionService();
+  await permissionService.requestPermissionsOnFirstInstall();
 
   runApp(AppState());
 }
 
-//void main() => runApp(AppState());
-
 class AppState extends StatelessWidget {
-  //Map _source = {ConnectivityResult.none: false};
   final MyConnectivity _connectivity = MyConnectivity.instance;
-  SharedPreferencesTest sh = new SharedPreferencesTest();
+  final SharedPreferencesTest sh = SharedPreferencesTest();
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +34,6 @@ class AppState extends StatelessWidget {
     _connectivity.myStream.listen((source) {
       switch (source.keys.toList()[0]) {
         case ConnectivityResult.mobile:
-          conectividad = true;
-          break;
         case ConnectivityResult.wifi:
           conectividad = true;
           break;
@@ -58,13 +41,13 @@ class AppState extends StatelessWidget {
         default:
           conectividad = false;
       }
-
-      // print(source);
       sh.setInternet(conectividad);
     });
-    //print(sh.getInternet());
+
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => AuthenticationProvider()),
+        ChangeNotifierProvider(create: (_) => LogoProvider()),
         ChangeNotifierProvider(create: (_) => CustomerProvider(), lazy: false),
       ],
       child: MyApp(),
@@ -72,24 +55,11 @@ class AppState extends StatelessWidget {
   }
 }
 
-/*void main() {
-  runApp(MyApp());
-}
-*/
-
-//@override
-//void initState() {
-//UserSimplePreferences pref = new UserSimplePreferences();
-//pref.init();
-//}
-
 class MyApp extends StatelessWidget {
-  SharedPreferencesTest sh = new SharedPreferencesTest();
-  // This widget is the root of your application.
+  final SharedPreferencesTest sh = SharedPreferencesTest();
+
   @override
   Widget build(BuildContext context) {
-    //sh.getInternet().then((value) => print(value));
-
     return MaterialApp(
       builder: EasyLoading.init(),
       title: 'Material App',
@@ -97,10 +67,9 @@ class MyApp extends StatelessWidget {
       initialRoute: 'login',
       routes: getApplicationRoutes(),
       onGenerateRoute: (RouteSettings settings) {
-        /*Cuando no esta definida la ruta, se dispara este comando generateroute*/
-        //print('Ruta llamada : ${settings.name}');
         return MaterialPageRoute(
-            builder: (BuildContext context) => LoginScreen());
+          builder: (BuildContext context) => LoginScreen(),
+        );
       },
       localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,
@@ -112,11 +81,7 @@ class MyApp extends StatelessWidget {
         const Locale('es', 'ES'),
       ],
       locale: Locale('es'),
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      //home: Nav(),
-      //home: MainPage(),
+      theme: ThemeData(primarySwatch: Colors.blue),
     );
   }
 }

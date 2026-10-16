@@ -255,7 +255,7 @@ class _MultimediaaddsubtState extends State<Multimediaaddsubt> {
                             Expanded(
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                    primary: Colors.orange,
+                                    backgroundColor: Colors.orange,
                                     side: BorderSide(
                                       width: 2.0,
                                       color: Colors.black,
@@ -284,7 +284,7 @@ class _MultimediaaddsubtState extends State<Multimediaaddsubt> {
                             Expanded(
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                    primary: Colors.green,
+                                    backgroundColor: Colors.green,
                                     side: BorderSide(
                                       width: 2.0,
                                       color: Colors.black,

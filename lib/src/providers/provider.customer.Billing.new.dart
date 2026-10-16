@@ -72,7 +72,7 @@ class _CustomerBillingNewState extends State<CustomerBillingNew> {
 
   final ButtonStyle _raisedButtonStyle = ElevatedButton.styleFrom(
     //onPrimary: Colors.black,
-    primary: Colors.blue,
+    backgroundColor: Colors.blue,
     minimumSize: Size(300, 72),
     padding: EdgeInsets.symmetric(horizontal: 16),
     shape: const RoundedRectangleBorder(
@@ -582,7 +582,7 @@ class _CustomerBillingNewState extends State<CustomerBillingNew> {
                                     const SizedBox(height: 30),
                                     ElevatedButton(
                                       style: ElevatedButton.styleFrom(
-                                        primary: Colors.orange,
+                                        backgroundColor: Colors.orange,
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 50, vertical: 20),
                                         textStyle: const TextStyle(
@@ -668,7 +668,7 @@ class _CustomerBillingNewState extends State<CustomerBillingNew> {
                                     const SizedBox(height: 10),
                                     ElevatedButton(
                                       style: ElevatedButton.styleFrom(
-                                        primary: Colors.green,
+                                        backgroundColor: Colors.green,
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 50, vertical: 20),
                                         textStyle: const TextStyle(
